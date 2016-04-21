@@ -12,8 +12,8 @@ MongoDB<br/>
 
 Steps for successful execution:<br/>
 1. Install MongoDB using Homebrew: ```brew install mongodb```<br/>
-2. Run MongoDB using ```mongo``` (Advisable to Robomongo as an interface to check db records)
-3. Use MIMIC database by running ```use MIMIC```
+2. Run MongoDB using ```mongo``` (Advisable to Robomongo as an interface to check db records) <br/>
+3. Use MIMIC database by running ```use MIMIC``` <br/>
 4. Insert the data(JSON) into mongoDB using: ```mongoimport --db MIMIC --collection records --type json --file MIMIC_InfoVis_2.json
 --jsonArray```<br/>
 5. Install Nodejs and NPM using Homebrew<br/>

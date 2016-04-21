@@ -41,7 +41,15 @@ function makeGraphs(error, apiData) {
 
 	var groupByAdmissType = recordsByAdmissType.reduceCount(function(d) {
 		return d.admiss;
-	})
+	});
+
+	var groupByAgeType = recordsByAge.reduceCount(function(d) {
+		return d.age;
+	});
+
+	var groupByMortType = recordsByMort.reduceCount(function(d) {
+		return d.mort;
+	});
 
 	/*var totalDonationsFundingStatus = fundingStatus.group().reduceSum(function(d) {
 		return d.funding_status;
@@ -67,6 +75,8 @@ console.log(maxAge);
 	var totalRecords = dc.numberDisplay("#total-records");
 	/*var netDonations = dc.numberDisplay("#net-donations");*/
 	var admissTypeChart = dc.barChart("#admiss-type-chart");
+	var ageChart = dc.barChart("#age-chart");
+	var binwidth = 0.2;
 
   	selectField = dc.selectMenu('#menuselect')
         .dimension(patientsex)
@@ -157,7 +167,22 @@ console.log(maxAge);
         .elasticY(true)
         .x(d3.scale.ordinal().domain(admisstype))
         .xUnits(dc.units.ordinal)
-		.colors(d3.scale.ordinal().range(['#1f78b4', '#b2df8a', '#cab2d6', '#bc80bd']))
+        .renderHorizontalGridLines(true)
+        .renderVerticalGridLines(true)
+        .ordering(function(d){return d.value;})
+        .yAxis().tickFormat(d3.format("s"));
+
+    ageChart
+    	//.width(800)
+        .height(220)
+        .transitionDuration(1000)
+        .dimension(patientage)
+        .group(groupByAgeType)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .centerBar(false)
+        .elasticY(true)
+        .x(d3.scale.ordinal().domain(patientage))
+        .xUnits(dc.units.ordinal)
         .renderHorizontalGridLines(true)
         .renderVerticalGridLines(true)
         .ordering(function(d){return d.value;})

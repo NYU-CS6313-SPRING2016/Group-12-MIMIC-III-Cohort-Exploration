@@ -1,4 +1,5 @@
-# node-dc-mongo
+# Group 12
+# MIMIC-III Cohort Exploration
 <h2>Data visualization using d3.js, dc.js, crossfilter.js, node.js and mongodb<h2><br/>
 
 Required Components:<br/>
@@ -11,9 +12,12 @@ MongoDB<br/>
 
 Steps for successful execution:<br/>
 1. Install MongoDB using Homebrew: ```brew install mongodb```<br/>
-2. Insert the data(JSON) into mongoDB using: ```mongoimport --db MIMIC --collection records --type json --file start_point.json
+2. Run MongoDB using ```mongo``` (Advisable to Robomongo as an interface to check db records)
+3. Use MIMIC database by running ```use MIMIC```
+4. Insert the data(JSON) into mongoDB using: ```mongoimport --db MIMIC --collection records --type json --file MIMIC_InfoVis_2.json
 --jsonArray```<br/>
-3. Install Nodejs and NPM<br/>
-4. Navigate to the home directory using command prompt and run ```npm install```, this will install the dependencies<br/>
-5. Navigate to the home directory using command prompt and run ```npm start```<br/>
-6. In your browser go to ```localhost:8080/index.html```<br/>
+5. Install Nodejs and NPM using Homebrew<br/>
+6. Navigate to the home directory using command prompt and run ```npm install```, this will install the dependencies<br/>
+7. Navigate to the home directory using command prompt and run ```npm start```<br/>
+8. In the browser, first go to ```localhost:8080/api/data``` to check the data currently in use <br/>
+9. Then go to ```localhost:8080/index.html``` (Might take a few seconds to load)<br/>

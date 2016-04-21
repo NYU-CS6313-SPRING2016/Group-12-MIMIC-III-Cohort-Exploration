@@ -21,3 +21,5 @@ Steps for successful execution:<br/>
 7. Navigate to the home directory using command prompt and run ```npm start```<br/>
 8. In the browser, first go to ```localhost:8080/api/data``` to check the data currently in use <br/>
 9. Then go to ```localhost:8080/index.html``` (Might take a few seconds to load)<br/>
+
+<h2> A live demo is available at: https://obscure-reef-90439.herokuapp.com/ </h2>

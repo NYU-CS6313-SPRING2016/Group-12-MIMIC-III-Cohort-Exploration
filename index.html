@@ -1,0 +1,354 @@
+<html>
+	<head>
+		<title>MIMIC-III Cohort Exploration</title>
+		<style>
+			body {
+				font-family: sans-serif;
+			}
+			.visualization {
+				width: 100%;
+			}
+			.chartarea {
+				display: inline;
+			}
+			.chart {
+				border: 1 solid gray;
+			}
+			.tick {
+				font-size: 8;
+			}
+			.tick line {
+				stroke: #ccc;
+			}
+			.domain {
+				fill: none;
+				stroke: #888;
+			}
+			#tooltip {
+				position: absolute;
+				top: 0;
+				left: 0;
+				background-color: rgba(255,255,255,0.6);
+				padding: 5;
+				border: solid 1px black;
+				visibility: hidden;
+				transition: all 0.5s;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="visualization">
+			<div class="chartarea">
+				<svg class="chart" id="admissionchart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="chart" id="agechart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="chart" id="sexchart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="chart" id="outcomechart">
+				</svg>
+			</div>
+			<br>
+			<div class="chartarea">
+				<ul id="diagnosislist">
+				</ul>
+			</div>
+		</div>
+		<div id="tooltip">Toolip</div>
+	</body>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script>
+		var chartWidth = 300;
+		var chartHeight = 250;
+
+		var barPadding = 1;
+
+		var chartMargin = {top:20,right:20,bottom:20,left:40};
+		var chartInnerWidth = chartWidth-chartMargin.left-chartMargin.right;
+		var chartInnerHeight = chartHeight-chartMargin.top-chartMargin.bottom;
+
+		var patients = [];
+		var admissionChart = d3.select("#admissionchart");
+		var ageChart = d3.select("#agechart");
+		var sexChart = d3.select("#sexchart");
+		var outcomeChart = d3.select("#outcomechart");
+		var diagnosisList = d3.select("#diagnosislist");
+
+		function renderAdmissionChart(patients) {
+			dataset = d3.nest()
+				.key(function(d) { return ""+d.admiss; })
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.admiss = d.key;
+				d.value = d.values;
+			});
+
+			admissionChart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight)
+
+			var xAxisGroup = admissionChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
+			var yAxisGroup = admissionChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var dataPointGroup = admissionChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var x = d3.scale.ordinal()
+				.rangeRoundBands([0, chartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.admiss; }));
+
+			var y = d3.scale.linear()
+				.range([chartInnerHeight,0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			var selection = dataPointGroup.selectAll("rect")
+				.data(dataset);
+
+			selection.enter()
+				.append("rect")
+					.attr("x", function(d) { return x(d.admiss); })
+					.attr("y", function(d) { return y(d.value); })
+					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
+					.attr("width", x.rangeBand())
+					.attr("fill", "cornflowerblue");
+
+			var xAxis = d3.svg.axis()
+				.scale(x)
+				.tickSize(-chartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(y)
+				.tickSize(-chartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderAgeChart(patients) {
+			dataset = d3.nest()
+				.key(function(d) {
+					var ageGroup = null;
+					if (d.age <= 10) { ageGroup = '0-10'; }
+					else if (d.age > 10 && d.age <= 20 ) { ageGroup = '10-20'; }
+					else if (d.age > 20 && d.age <= 30 ) { ageGroup = '20-30'; }
+					else if (d.age > 30 && d.age <= 40 ) { ageGroup = '30-40'; }
+					else if (d.age > 40 && d.age <= 50 ) { ageGroup = '40-50'; }
+					else if (d.age > 50 && d.age <= 60 ) { ageGroup = '50-60'; }
+					else if (d.age > 60 && d.age <= 70 ) { ageGroup = '60-70'; }
+					else if (d.age > 70 && d.age <= 80 ) { ageGroup = '70-80'; }
+					else if (d.age > 80 && d.age <= 90 ) { ageGroup = '80-90'; }
+					else if (d.age > 90 && d.age <= 100 ) { ageGroup = '90-100'; }
+					return ageGroup; })
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.age = d.key;
+				d.value = d.values;
+			});
+
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.age,b.age) });
+
+			ageChart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight)
+
+			var xAxisGroup = ageChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
+			var yAxisGroup = ageChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var dataPointGroup = ageChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var x = d3.scale.ordinal()
+				.rangeRoundBands([0, chartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.age; }));
+
+			var y = d3.scale.linear()
+				.range([chartInnerHeight,0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			var selection = dataPointGroup.selectAll("rect")
+				.data(dataset);
+
+			selection.enter()
+				.append("rect")
+					.attr("x", function(d) { return x(d.age); })
+					.attr("y", function(d) { return y(d.value); })
+					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
+					.attr("width", x.rangeBand())
+					.attr("fill", "cornflowerblue");
+
+			var xAxis = d3.svg.axis()
+				.scale(x)
+				.tickSize(-chartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(y)
+				.tickSize(-chartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderSexChart(patients) {
+			dataset = d3.nest()
+				.key(function(d) { return d.sex; })
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.sex = d.key;
+				d.value = d.values;
+			});
+
+			sexChart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight)
+
+			var xAxisGroup = sexChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
+			var yAxisGroup = sexChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var dataPointGroup = sexChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var x = d3.scale.ordinal()
+				.rangeRoundBands([0, chartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.sex; }));
+
+			var y = d3.scale.linear()
+				.range([chartInnerHeight,0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			var selection = dataPointGroup.selectAll("rect")
+				.data(dataset);
+
+			selection.enter()
+				.append("rect")
+					.attr("x", function(d) { return x(d.sex); })
+					.attr("y", function(d) { return y(d.value); })
+					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
+					.attr("width", x.rangeBand())
+					.attr("fill", "cornflowerblue");
+
+			var xAxis = d3.svg.axis()
+				.scale(x)
+				.tickSize(-chartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(y)
+				.tickSize(-chartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderOutcomeChart(patients) {
+			dataset = d3.nest()
+				.key(function(d) { return ""+d.mort; })
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.mort = d.key;
+				d.value = d.values;
+			});
+
+			outcomeChart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight)
+
+			var xAxisGroup = outcomeChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
+			var yAxisGroup = outcomeChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var dataPointGroup = outcomeChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var x = d3.scale.ordinal()
+				.rangeRoundBands([0, chartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.mort; }));
+
+			var y = d3.scale.linear()
+				.range([chartInnerHeight,0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			var selection = dataPointGroup.selectAll("rect")
+				.data(dataset);
+
+			selection.enter()
+				.append("rect")
+					.attr("x", function(d) { return x(d.mort); })
+					.attr("y", function(d) { return y(d.value); })
+					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
+					.attr("width", x.rangeBand())
+					.attr("fill", "cornflowerblue");
+
+			var xAxis = d3.svg.axis()
+				.scale(x)
+				.tickSize(-chartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(y)
+				.tickSize(-chartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderDiagnosisList(patients) {
+			dataset = d3.nest()
+				.key(function(d) { return ""+d.diag1; })
+				/* how to use multiple diagnoses in here? */
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.diag = d.key;
+				d.value = d.values;
+			});
+
+			var selection = list.selectAll("li")
+				.data(patients, function(d) {return d.name});
+			selection.enter()
+				.append("li")
+				.attr("class", "listItem")
+				.text(function(d) {return d.name})
+				.on("mouseenter", function(d,i) {highlight(d.name)})
+				.on("mouseleave", function(d,i) {unhighlight()});
+
+			selection.exit().remove();
+		}
+
+		function render(patients) {
+			renderAdmissionChart(patients);
+			renderAgeChart(patients);
+			renderSexChart(patients);
+			renderOutcomeChart(patients);
+		}
+
+		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_2.json", function(error, result) {
+			patients = result;
+			render(patients);
+		});
+	</script>
+</html>

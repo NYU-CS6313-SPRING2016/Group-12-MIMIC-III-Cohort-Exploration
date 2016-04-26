@@ -14,13 +14,19 @@
 			.chart {
 				border: 1 solid gray;
 			}
-			.tick {
-				font-size: 8;
+			.chart rect.unselected {
+				fill: cornflowerblue;
 			}
-			.tick line {
+			.chart rect.selected {
+				fill: orange;
+			}
+			.chart .tick {
+				font-size: 7;
+			}
+			.chart .tick line {
 				stroke: #ccc;
 			}
-			.domain {
+			.chart .domain {
 				fill: none;
 				stroke: #888;
 			}
@@ -118,11 +124,39 @@
 
 			selection.enter()
 				.append("rect")
+					.attr("id", function(d) { return "admiss"+d.key; })
+					.attr("class", "unselected")
 					.attr("x", function(d) { return xScale(d.admiss); })
 					.attr("y", function(d) { return yScale(d.value); })
 					.attr("width", xScale.rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
-					.attr("fill", "cornflowerblue");
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+						}
+					})
+					.on("mouseenter", function(d,i) {
+						d3.select(this)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(d.value);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.select(this)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					});
 
 			var xAxis = d3.svg.axis()
 				.scale(xScale)
@@ -188,11 +222,39 @@
 
 			selection.enter()
 				.append("rect")
+					.attr("id", function(d) { return "age"+d.key; })
+					.attr("class", "unselected")
 					.attr("x", function(d) { return xScale(d.age); })
 					.attr("y", function(d) { return yScale(d.value); })
 					.attr("width", xScale.rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
-					.attr("fill", "cornflowerblue");
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+						}
+					})
+					.on("mouseenter", function(d,i) {
+						d3.select(this)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(d.value);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.select(this)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					});
 
 			var xAxis = d3.svg.axis()
 				.scale(xScale)
@@ -243,11 +305,39 @@
 
 			selection.enter()
 				.append("rect")
+					.attr("id", function(d) { return "sex"+d.key; })
+					.attr("class", "unselected")
 					.attr("x", function(d) { return xScale(d.sex); })
 					.attr("y", function(d) { return yScale(d.value); })
 					.attr("width", xScale.rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
-					.attr("fill", "cornflowerblue");
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+						}
+					})
+					.on("mouseenter", function(d,i) {
+						d3.select(this)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(d.value);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.select(this)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					});
 
 			var xAxis = d3.svg.axis()
 				.scale(xScale)
@@ -298,11 +388,39 @@
 
 			selection.enter()
 				.append("rect")
+					.attr("id", function(d) { return "mort"+d.key; })
+					.attr("class", "unselected")
 					.attr("x", function(d) { return xScale(d.mort); })
 					.attr("y", function(d) { return yScale(d.value); })
 					.attr("width", xScale.rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
-					.attr("fill", "cornflowerblue");
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+						}
+					})
+					.on("mouseenter", function(d,i) {
+						d3.select(this)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(d.value);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.select(this)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					});
 
 			var xAxis = d3.svg.axis()
 				.scale(xScale)
@@ -350,6 +468,24 @@
 
 		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_2.json", function(error, result) {
 			patients = result;
+
+			/*// everyone
+			var cross = crossfilter(result);
+			console.log(cross.groupAll().reduceCount().value());
+
+			// only admiss 2
+			var dimadmiss = cross.dimension(function (d) { return d.admiss; }).filter("2");
+			console.log(dimadmiss.top(Infinity)); // reduced list of elements
+			console.log(cross.groupAll().reduceCount().value());
+
+			// only age 0-10
+			var dimage = cross.dimension(function (d) { return d.age; }).filterRange([0,10]);
+			console.log(cross.groupAll().reduceCount().value());
+
+			// only men
+			var dimsex = cross.dimension(function (d) { return d.sex; }).filter("M");
+			console.log(cross.groupAll().reduceCount().value());*/
+
 			render(patients);
 		});
 	</script>

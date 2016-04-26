@@ -10,23 +10,41 @@
 			}
 			.chartarea {
 				display: inline;
+				float: left;
+				margin: 2px;
+				border: solid 1px gray;
 			}
-			.chart {
-				border: 1 solid gray;
+			.topchart {
+				width: 300px;
+				height: 150px;
 			}
-			.chart rect.unselected {
+			#diagnosislist {
+				width: 300px;
+				height: 456px;
+				padding: 0;
+				margin: 0;
+			}
+			.mainchart {
+				width: 912px;
+				height: 300px;
+			}
+			.bottomchart {
+				width: 453px;
+				height: 150px;
+			}
+			.topchart rect.unselected {
 				fill: cornflowerblue;
 			}
-			.chart rect.selected {
+			.topchart rect.selected {
 				fill: orange;
 			}
-			.chart .tick {
+			.tick {
 				font-size: 7;
 			}
-			.chart .tick line {
+			.tick line {
 				stroke: #ccc;
 			}
-			.chart .domain {
+			.domain {
 				fill: none;
 				stroke: #888;
 			}
@@ -45,25 +63,38 @@
 	<body>
 		<div class="vis">
 			<div class="chartarea">
-				<svg class="chart" id="admisschart">
+				<svg class="topchart" id="admisschart">
 				</svg>
 			</div>
 			<div class="chartarea">
-				<svg class="chart" id="agechart">
+				<svg class="topchart" id="agechart">
 				</svg>
 			</div>
 			<div class="chartarea">
-				<svg class="chart" id="sexchart">
+				<svg class="topchart" id="sexchart">
 				</svg>
 			</div>
 			<div class="chartarea">
-				<svg class="chart" id="mortchart">
+				<svg class="topchart" id="mortchart">
 				</svg>
 			</div>
 			<br>
 			<div class="chartarea">
 				<ul id="diagnosislist">
 				</ul>
+			</div>
+			<div class="chartarea">
+				<svg class="mainchart" id="flowchart">
+				</svg>
+			</div>
+			<br>
+			<div class="chartarea">
+				<svg class="bottomchart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="bottomchart">
+				</svg>
 			</div>
 		</div>
 		<div id="tooltip">Toolip</div>
@@ -72,7 +103,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
 	<script>
 		var chartWidth = 300;
-		var chartHeight = 250;
+		var chartHeight = 150;
 
 		var barPadding = 1;
 

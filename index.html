@@ -105,11 +105,11 @@
 			var dataPointGroup = admissChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var x = d3.scale.ordinal()
+			var xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
 				.domain(dataset.map(function(d) { return d.admiss; }));
 
-			var y = d3.scale.linear()
+			var yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
@@ -118,20 +118,20 @@
 
 			selection.enter()
 				.append("rect")
-					.attr("x", function(d) { return x(d.admiss); })
-					.attr("y", function(d) { return y(d.value); })
-					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
-					.attr("width", x.rangeBand())
+					.attr("x", function(d) { return xScale(d.admiss); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
 					.attr("fill", "cornflowerblue");
 
 			var xAxis = d3.svg.axis()
-				.scale(x)
+				.scale(xScale)
 				.tickSize(-chartInnerHeight)
 				.orient("bottom");
 			xAxisGroup.call(xAxis);
 
 			var yAxis = d3.svg.axis()
-				.scale(y)
+				.scale(yScale)
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
@@ -175,11 +175,11 @@
 			var dataPointGroup = ageChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var x = d3.scale.ordinal()
+			var xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
 				.domain(dataset.map(function(d) { return d.age; }));
 
-			var y = d3.scale.linear()
+			var yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
@@ -188,20 +188,20 @@
 
 			selection.enter()
 				.append("rect")
-					.attr("x", function(d) { return x(d.age); })
-					.attr("y", function(d) { return y(d.value); })
-					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
-					.attr("width", x.rangeBand())
+					.attr("x", function(d) { return xScale(d.age); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
 					.attr("fill", "cornflowerblue");
 
 			var xAxis = d3.svg.axis()
-				.scale(x)
+				.scale(xScale)
 				.tickSize(-chartInnerHeight)
 				.orient("bottom");
 			xAxisGroup.call(xAxis);
 
 			var yAxis = d3.svg.axis()
-				.scale(y)
+				.scale(yScale)
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
@@ -230,11 +230,11 @@
 			var dataPointGroup = sexChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var x = d3.scale.ordinal()
+			var xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
 				.domain(dataset.map(function(d) { return d.sex; }));
 
-			var y = d3.scale.linear()
+			var yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
@@ -243,20 +243,20 @@
 
 			selection.enter()
 				.append("rect")
-					.attr("x", function(d) { return x(d.sex); })
-					.attr("y", function(d) { return y(d.value); })
-					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
-					.attr("width", x.rangeBand())
+					.attr("x", function(d) { return xScale(d.sex); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
 					.attr("fill", "cornflowerblue");
 
 			var xAxis = d3.svg.axis()
-				.scale(x)
+				.scale(xScale)
 				.tickSize(-chartInnerHeight)
 				.orient("bottom");
 			xAxisGroup.call(xAxis);
 
 			var yAxis = d3.svg.axis()
-				.scale(y)
+				.scale(yScale)
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
@@ -285,11 +285,11 @@
 			var dataPointGroup = mortChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var x = d3.scale.ordinal()
+			var xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
 				.domain(dataset.map(function(d) { return d.mort; }));
 
-			var y = d3.scale.linear()
+			var yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
@@ -298,20 +298,20 @@
 
 			selection.enter()
 				.append("rect")
-					.attr("x", function(d) { return x(d.mort); })
-					.attr("y", function(d) { return y(d.value); })
-					.attr("height", function(d) { return chartInnerHeight - y(d.value); })
-					.attr("width", x.rangeBand())
+					.attr("x", function(d) { return xScale(d.mort); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
 					.attr("fill", "cornflowerblue");
 
 			var xAxis = d3.svg.axis()
-				.scale(x)
+				.scale(xScale)
 				.tickSize(-chartInnerHeight)
 				.orient("bottom");
 			xAxisGroup.call(xAxis);
 
 			var yAxis = d3.svg.axis()
-				.scale(y)
+				.scale(yScale)
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);

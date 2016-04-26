@@ -5,7 +5,7 @@
 			body {
 				font-family: sans-serif;
 			}
-			.visualization {
+			.vis {
 				width: 100%;
 			}
 			.chartarea {
@@ -37,9 +37,9 @@
 		</style>
 	</head>
 	<body>
-		<div class="visualization">
+		<div class="vis">
 			<div class="chartarea">
-				<svg class="chart" id="admissionchart">
+				<svg class="chart" id="admisschart">
 				</svg>
 			</div>
 			<div class="chartarea">
@@ -51,7 +51,7 @@
 				</svg>
 			</div>
 			<div class="chartarea">
-				<svg class="chart" id="outcomechart">
+				<svg class="chart" id="mortchart">
 				</svg>
 			</div>
 			<br>
@@ -63,6 +63,7 @@
 		<div id="tooltip">Toolip</div>
 	</body>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
 	<script>
 		var chartWidth = 300;
 		var chartHeight = 250;
@@ -73,14 +74,15 @@
 		var chartInnerWidth = chartWidth-chartMargin.left-chartMargin.right;
 		var chartInnerHeight = chartHeight-chartMargin.top-chartMargin.bottom;
 
-		var patients = [];
-		var admissionChart = d3.select("#admissionchart");
+		var patients;
+
+		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
 		var sexChart = d3.select("#sexchart");
-		var outcomeChart = d3.select("#outcomechart");
+		var mortChart = d3.select("#mortchart");
 		var diagnosisList = d3.select("#diagnosislist");
 
-		function renderAdmissionChart(patients) {
+		function renderAdmissChart(patients) {
 			dataset = d3.nest()
 				.key(function(d) { return ""+d.admiss; })
 				.rollup(function(r) { return r.length })
@@ -91,16 +93,16 @@
 				d.value = d.values;
 			});
 
-			admissionChart
+			admissChart
 				.attr("width", chartWidth)
 				.attr("height", chartHeight)
 
-			var xAxisGroup = admissionChart.append("g")
+			var xAxisGroup = admissChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
-			var yAxisGroup = admissionChart.append("g")
+			var yAxisGroup = admissChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var dataPointGroup = admissionChart.append("g")
+			var dataPointGroup = admissChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
 			var x = d3.scale.ordinal()
@@ -260,7 +262,7 @@
 			yAxisGroup.call(yAxis);
 		}
 
-		function renderOutcomeChart(patients) {
+		function renderMortChart(patients) {
 			dataset = d3.nest()
 				.key(function(d) { return ""+d.mort; })
 				.rollup(function(r) { return r.length })
@@ -271,16 +273,16 @@
 				d.value = d.values;
 			});
 
-			outcomeChart
+			mortChart
 				.attr("width", chartWidth)
 				.attr("height", chartHeight)
 
-			var xAxisGroup = outcomeChart.append("g")
+			var xAxisGroup = mortChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
-			var yAxisGroup = outcomeChart.append("g")
+			var yAxisGroup = mortChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var dataPointGroup = outcomeChart.append("g")
+			var dataPointGroup = mortChart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
 			var x = d3.scale.ordinal()
@@ -315,10 +317,10 @@
 			yAxisGroup.call(yAxis);
 		}
 
-		function renderDiagnosisList(patients) {
+		/*function renderDiagnosisList(patients) {
 			dataset = d3.nest()
 				.key(function(d) { return ""+d.diag1; })
-				/* how to use multiple diagnoses in here? */
+				// how to use multiple diagnoses in here?
 				.rollup(function(r) { return r.length })
 				.entries(patients)
 
@@ -337,13 +339,13 @@
 				.on("mouseleave", function(d,i) {unhighlight()});
 
 			selection.exit().remove();
-		}
+		}*/
 
 		function render(patients) {
-			renderAdmissionChart(patients);
+			renderAdmissChart(patients);
 			renderAgeChart(patients);
 			renderSexChart(patients);
-			renderOutcomeChart(patients);
+			renderMortChart(patients);
 		}
 
 		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_2.json", function(error, result) {

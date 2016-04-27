@@ -34,10 +34,10 @@
 				height: 150px;
 			}
 			.topchart rect.unselected {
-				fill: cornflowerblue;
+				fill: gray;
 			}
 			.topchart rect.selected {
-				fill: orange;
+				fill: cornflowerblue;
 			}
 			.tick {
 				font-size: 7;
@@ -112,64 +112,71 @@
 		var chartInnerWidth = chartWidth-chartMargin.left-chartMargin.right;
 		var chartInnerHeight = chartHeight-chartMargin.top-chartMargin.bottom;
 
-		var patients;
+		var originalPatients;
+		var cf;
+
+		var admissDim;
+		var ageDim;
+		var sexDim;
+		var mortDim;
+
+		//var admissSelected = {};
+		//var admissFilterStrings = {};
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
 		var sexChart = d3.select("#sexchart");
 		var mortChart = d3.select("#mortchart");
+
 		var diagnosisList = d3.select("#diagnosislist");
 
-		function renderAdmissChart(patients) {
-			dataset = d3.nest()
-				.key(function(d) { return ""+d.admiss; })
-				.rollup(function(r) { return r.length })
+		function renderTopChart(chart, dimension, keyFunction, idString) {
+			var patients = dimension.top(Infinity);
+
+			var dataset = d3.nest()
+				.key(keyFunction)
+				.rollup(function(r) { return r.length; })
 				.entries(patients)
 
 			dataset.forEach(function(d) {
-				d.admiss = d.key;
+				//d.age = d.key;
 				d.value = d.values;
 			});
 
-			admissChart
-				.attr("width", chartWidth)
-				.attr("height", chartHeight)
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.key,b.key); });
 
-			var xAxisGroup = admissChart.append("g")
+			chart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight);
+
+			var xAxisGroup = chart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
-			var yAxisGroup = admissChart.append("g")
+
+			var yAxisGroup = chart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			var dataPointGroup = admissChart.append("g")
+			var dataPointGroup = chart.append("g")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
 			var xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
-				.domain(dataset.map(function(d) { return d.admiss; }));
+				.domain(dataset.map(function(d) { return d.key; }));
 
 			var yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
-			var selection = dataPointGroup.selectAll("rect")
-				.data(dataset);
-
-			selection.enter()
+			dataPointGroup.selectAll("rect")
+				.data(dataset)
+				.enter()
 				.append("rect")
-					.attr("id", function(d) { return "admiss"+d.key; })
+					.attr("id", function(d) { return idString+d.key; })
 					.attr("class", "unselected")
-					.attr("x", function(d) { return xScale(d.admiss); })
+					.attr("x", function(d) { return xScale(d.key); })
 					.attr("y", function(d) { return yScale(d.value); })
 					.attr("width", xScale.rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
-					.on("click", function(d,i) {
-						if (d3.select(this).attr("class") == "unselected") {
-							d3.select(this).attr("class", "selected");
-						}
-						else {
-							d3.select(this).attr("class", "unselected");
-						}
-					})
 					.on("mouseenter", function(d,i) {
 						d3.select(this)
 							.style("stroke", "black");
@@ -188,6 +195,14 @@
 							visibility: "hidden",
 							opacity: 0
 						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+						}
 					});
 
 			var xAxis = d3.svg.axis()
@@ -203,7 +218,142 @@
 			yAxisGroup.call(yAxis);
 		}
 
-		function renderAgeChart(patients) {
+		/*function renderAdmissChart() {
+			var dataset;
+
+			var originalDataset = d3.nest()
+				.key(function(d) { return ""+d.admiss; })
+				.rollup(function(r) { return r.length })
+				.entries(originalPatients)
+
+			originalDataset.forEach(function(d) {
+				d.admiss = d.key;
+				d.value = d.values;
+			});
+
+			admissChart
+				.attr("width", chartWidth)
+				.attr("height", chartHeight)
+
+			var xAxisGroup = admissChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+(chartInnerHeight+chartMargin.top)+")");
+			var yAxisGroup = admissChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var backgroundDataPointGroup = admissChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var foregroundDataPointGroup = admissChart.append("g")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var xScale = d3.scale.ordinal()
+				.rangeRoundBands([0, chartInnerWidth], .1)
+				.domain(originalDataset.map(function(d) { return d.admiss; }));
+
+			var yScale = d3.scale.linear()
+				.range([chartInnerHeight,0])
+				.domain([0, d3.max(originalDataset, function(d) { return d.value; })]);
+
+			backgroundDataPointGroup.selectAll("rect")
+				.data(originalDataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "bgadmiss"+d.key; })
+					.attr("class", function(d) {
+						if (admissSelected[d3.select(this).attr("id")] === undefined) {
+							admissSelected[d3.select(this).attr("id")] = "unselected";
+						}
+						return admissSelected[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return xScale(d.admiss); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.select(this)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(d.value);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.select(this)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+
+							admissFilterStrings[d3.select(this).attr("id")] = "f = f || d=="+d.key+";";
+							console.log(admissFilterStrings);
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							admissFilterStrings[d3.select(this).attr("id")] = "";
+							console.log(admissFilterStrings);
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in admissFilterStrings) {
+    						var value = admissFilterStrings[key];
+    						filterString += value;
+						}
+						var admissFilter = null;
+						if (filterString !== "") {
+							admissFilter = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						admissDim.filter(admissFilter);
+					});
+
+			patients = admissDim.top(Infinity);
+			console.log(patients);
+
+			dataset = d3.nest()
+				.key(function(d) { return ""+d.admiss; })
+				.rollup(function(r) { return r.length })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				d.admiss = d.key;
+				d.value = d.values;
+			});
+
+			foregroundDataPointGroup.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "fgadmiss"+d.key; })
+					.attr("fill", "red")
+					.attr("x", function(d) { return xScale(d.admiss); })
+					.attr("y", function(d) { return yScale(d.value); })
+					.attr("width", xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - yScale(d.value); });
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.tickSize(-chartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.tickSize(-chartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}*/
+
+		/*function renderAgeChart() {
+			var patients = ageDim.top(Infinity);
+
 			dataset = d3.nest()
 				.key(function(d) {
 					var ageGroup = null;
@@ -299,9 +449,11 @@
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
-		}
+		}*/
 
-		function renderSexChart(patients) {
+		/*function renderSexChart() {
+			var patients = sexDim.top(Infinity);
+
 			dataset = d3.nest()
 				.key(function(d) { return d.sex; })
 				.rollup(function(r) { return r.length })
@@ -382,9 +534,11 @@
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
-		}
+		}*/
 
-		function renderMortChart(patients) {
+		/*function renderMortChart() {
+			var patients = mortDim.top(Infinity);
+
 			dataset = d3.nest()
 				.key(function(d) { return ""+d.mort; })
 				.rollup(function(r) { return r.length })
@@ -465,7 +619,7 @@
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);
-		}
+		}*/
 
 		/*function renderDiagnosisList(patients) {
 			dataset = d3.nest()
@@ -491,34 +645,67 @@
 			selection.exit().remove();
 		}*/
 
-		function render(patients) {
-			renderAdmissChart(patients);
-			renderAgeChart(patients);
-			renderSexChart(patients);
-			renderMortChart(patients);
+		function render() {
+			cf = crossfilter(originalPatients);
+
+			admissDim = cf.dimension(function (d) { return d.admiss; });
+			ageDim = cf.dimension(function (d) { return d.age; });
+			sexDim = cf.dimension(function (d) { return d.sex; });
+			mortDim = cf.dimension(function (d) { return d.mort; });
+
+			var admissKeyFunction = function(d) {
+				return d.admiss;
+			}
+			var ageKeyFunction = function(d) {
+				var ageGroup = null;
+				if (d.age <= 10) { ageGroup = '0-10'; }
+				else if (d.age > 10 && d.age <= 20 ) { ageGroup = '10-20'; }
+				else if (d.age > 20 && d.age <= 30 ) { ageGroup = '20-30'; }
+				else if (d.age > 30 && d.age <= 40 ) { ageGroup = '30-40'; }
+				else if (d.age > 40 && d.age <= 50 ) { ageGroup = '40-50'; }
+				else if (d.age > 50 && d.age <= 60 ) { ageGroup = '50-60'; }
+				else if (d.age > 60 && d.age <= 70 ) { ageGroup = '60-70'; }
+				else if (d.age > 70 && d.age <= 80 ) { ageGroup = '70-80'; }
+				else if (d.age > 80 && d.age <= 90 ) { ageGroup = '80-90'; }
+				else if (d.age > 90 && d.age <= 100 ) { ageGroup = '90-100'; }
+				return ageGroup;
+			}
+			var sexKeyFunction = function(d) {
+				return d.sex;
+			}
+			var mortKeyFunction = function(d) {
+				return d.mort;
+			}
+
+			renderTopChart(admissChart, admissDim, admissKeyFunction, "admiss");
+			renderTopChart(ageChart, ageDim, ageKeyFunction, "age");
+			renderTopChart(sexChart, sexDim, sexKeyFunction, "sex");
+			renderTopChart(mortChart, mortDim, mortKeyFunction, "mort");
 		}
 
 		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_2.json", function(error, result) {
-			patients = result;
+			originalPatients = result;
 
-			/*// everyone
-			var cross = crossfilter(result);
-			console.log(cross.groupAll().reduceCount().value());
+			// everyone
+			/*var cf = crossfilter(result);
+			console.log(cf.groupAll().reduceCount().value());
 
-			// only admiss 2
-			var dimadmiss = cross.dimension(function (d) { return d.admiss; }).filter("2");
+			// only admiss 1 and 3
+			//var filterFunction = function(d) { check = d==1; check = check || d==3; return check; }
+			var filterFunction = new Function("d", "check = d==1; check = check || d==3; return check;");
+			var dimadmiss = cf.dimension(function (d) { return d.admiss; }).filter(filterFunction);
 			console.log(dimadmiss.top(Infinity)); // reduced list of elements
-			console.log(cross.groupAll().reduceCount().value());
+			console.log(cf.groupAll().reduceCount().value());
 
 			// only age 0-10
-			var dimage = cross.dimension(function (d) { return d.age; }).filterRange([0,10]);
-			console.log(cross.groupAll().reduceCount().value());
+			var dimage = cf.dimension(function (d) { return d.age; }).filterRange([0,10]);
+			console.log(cf.groupAll().reduceCount().value());
 
 			// only men
-			var dimsex = cross.dimension(function (d) { return d.sex; }).filter("M");
-			console.log(cross.groupAll().reduceCount().value());*/
+			var dimsex = cf.dimension(function (d) { return d.sex; }).filter("M");
+			console.log(cf.groupAll().reduceCount().value());*/
 
-			render(patients);
+			render();
 		});
 	</script>
 </html>

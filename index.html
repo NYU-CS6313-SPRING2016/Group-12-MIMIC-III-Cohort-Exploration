@@ -59,7 +59,7 @@
 				position: absolute;
 				top: 0;
 				left: 0;
-				background-color: rgba(255,255,255,0.6);
+				background-color: rgba(255,255,255,0.9);
 				padding: 5;
 				border: solid 1px black;
 				visibility: hidden;
@@ -155,6 +155,16 @@
 			return d.mort;
 		};
 
+		var admissPatientNumbers = {};
+		var agePatientNumbers = {};
+		var sexPatientNumbers = {};
+		var mortPatientNumbers = {};
+
+		var admissSelectedPatientNumbers = {};
+		var ageSelectedPatientNumbers = {};
+		var sexSelectedPatientNumbers = {};
+		var mortSelectedPatientNumbers = {};
+
 		var admissScales = {};
 		var ageScales = {};
 		var sexScales = {};
@@ -190,7 +200,7 @@
 
 		var diagnosisList = d3.select("#diagnosislist");
 
-		function updateChart(chart, dimension, keyFunction, scalesDict, selectedDict) {
+		function updateTopChart(chart, dimension, keyFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
 			var dataset = d3.nest()
 				.key(keyFunction)
 				.rollup(function(r) { return 0; })
@@ -223,6 +233,10 @@
 				if (!keyFound) { selectedDataset.push(dict); }
 			});
 
+			selectedDataset.forEach(function(d) {
+				selectedPatientNumbersDict[d.key] = d.value;
+			});
+
 			selectedDataset
 				.sort(function(a,b) { return d3.ascending(a.key, b.key) });
 
@@ -251,13 +265,13 @@
 		}
 
 		function updateData() {
-			updateChart(admissChart, admissDim, admissKeyFunction, admissScales, admissSelected);
-			updateChart(ageChart, ageDim, ageKeyFunction, ageScales, ageSelected);
-			updateChart(sexChart, sexDim, sexKeyFunction, sexScales, sexSelected);
-			updateChart(mortChart, mortDim, mortKeyFunction, mortScales, mortSelected);
+			updateTopChart(admissChart, admissDim, admissKeyFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+			updateTopChart(ageChart, ageDim, ageKeyFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
+			updateTopChart(sexChart, sexDim, sexKeyFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
+			updateTopChart(mortChart, mortDim, mortKeyFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
 		}
 
-		function renderTopChart(chart, dimension, keyFunction, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
+		function renderTopChart(chart, dimension, keyFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
 			var dataset = d3.nest()
 				.key(keyFunction)
 				.rollup(function(r) { return r.length; })
@@ -266,6 +280,8 @@
 			dataset.forEach(function(d) {
 				//d.age = d.key;
 				d.value = d.values;
+
+				patientNumbersDict[d.key] = d.value;
 			});
 
 			dataset
@@ -281,6 +297,8 @@
 			selectedDataset.forEach(function(d) {
 				//d.age = d.key;
 				d.value = d.values;
+
+				selectedPatientNumbersDict[d.key] = d.value;
 			});
 
 			selectedDataset
@@ -330,7 +348,7 @@
 					.attr("width", scalesDict["xScale"].rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - scalesDict["yScale"](d.value); })
 					.on("mouseenter", function(d,i) {
-						d3.select(this)
+						d3.selectAll("#"+idString+d.key)
 							.style("stroke", "black");
 						d3.select("#tooltip").style({
 							top: d3.event.clientY+5,
@@ -338,10 +356,10 @@
 							visibility: "visible",
 							opacity: 1
 						});
-						d3.select("#tooltip").text(d.value);
+						d3.select("#tooltip").text(selectedPatientNumbersDict[d.key]+"/"+patientNumbersDict[d.key]);
 					})
 					.on("mouseleave", function(d,i) {
-						d3.select(this)
+						d3.selectAll("#"+idString+d.key)
 							.style("stroke", undefined);
 						d3.select("#tooltip").style({
 							visibility: "hidden",
@@ -399,7 +417,7 @@
 					.attr("width", scalesDict["xScale"].rangeBand())
 					.attr("height", function(d) { return chartInnerHeight - scalesDict["yScale"](d.value); })
 					.on("mouseenter", function(d,i) {
-						d3.select(this)
+						d3.selectAll("#"+idString+d.key)
 							.style("stroke", "black");
 						d3.select("#tooltip").style({
 							top: d3.event.clientY+5,
@@ -407,10 +425,10 @@
 							visibility: "visible",
 							opacity: 1
 						});
-						d3.select("#tooltip").text(d.value);
+						d3.select("#tooltip").text(selectedPatientNumbersDict[d.key]+"/"+patientNumbersDict[d.key]);
 					})
 					.on("mouseleave", function(d,i) {
-						d3.select(this)
+						d3.selectAll("#"+idString+d.key)
 							.style("stroke", undefined);
 						d3.select("#tooltip").style({
 							visibility: "hidden",
@@ -490,10 +508,10 @@
 		}*/
 
 		function render() {
-			renderTopChart(admissChart, admissDim, admissKeyFunction, admissScales, "admiss", admissSelected, admissFilterStrings, admissFilterStringFunction);
-			renderTopChart(ageChart, ageDim, ageKeyFunction, ageScales, "age", ageSelected, ageFilterStrings, ageFilterStringFunction);
-			renderTopChart(sexChart, sexDim, sexKeyFunction, sexScales, "sex", sexSelected, sexFilterStrings, sexFilterStringFunction);
-			renderTopChart(mortChart, mortDim, mortKeyFunction, mortScales, "mort", mortSelected, mortFilterStrings, mortFilterStringFunction);
+			renderTopChart(admissChart, admissDim, admissKeyFunction, admissPatientNumbers, admissSelectedPatientNumbers, admissScales, "admiss", admissSelected, admissFilterStrings, admissFilterStringFunction);
+			renderTopChart(ageChart, ageDim, ageKeyFunction, agePatientNumbers, ageSelectedPatientNumbers, ageScales, "age", ageSelected, ageFilterStrings, ageFilterStringFunction);
+			renderTopChart(sexChart, sexDim, sexKeyFunction, sexPatientNumbers, sexSelectedPatientNumbers, sexScales, "sex", sexSelected, sexFilterStrings, sexFilterStringFunction);
+			renderTopChart(mortChart, mortDim, mortKeyFunction, mortPatientNumbers, mortSelectedPatientNumbers, mortScales, "mort", mortSelected, mortFilterStrings, mortFilterStringFunction);
 		}
 
 		function init(data) {

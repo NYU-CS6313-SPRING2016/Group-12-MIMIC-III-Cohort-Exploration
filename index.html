@@ -260,8 +260,8 @@
 					}
 					return selectedDict[d3.select(this).attr("id")];
 				})
-				.attr("y", function(d) { return scalesDict["yScale"](d.value); })
-				.attr("height", function(d) { return chartInnerHeight - scalesDict["yScale"](d.value); })
+				.attr("y", function(d) { return scalesDict.yScale(d.value); })
+				.attr("height", function(d) { return chartInnerHeight - scalesDict.yScale(d.value); })
 		}
 
 		function updateData() {
@@ -324,11 +324,11 @@
 				.attr("class", "fg")
 				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
 
-			scalesDict["xScale"] = d3.scale.ordinal()
+			scalesDict.xScale = d3.scale.ordinal()
 				.rangeRoundBands([0, chartInnerWidth], .1)
 				.domain(dataset.map(function(d) { return d.key; }));
 
-			scalesDict["yScale"] = d3.scale.linear()
+			scalesDict.yScale = d3.scale.linear()
 				.range([chartInnerHeight,0])
 				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
@@ -343,10 +343,10 @@
 						}
 						return selectedDict[d3.select(this).attr("id")];
 					})
-					.attr("x", function(d) { return scalesDict["xScale"](d.key); })
-					.attr("y", function(d) { return scalesDict["yScale"](d.value); })
-					.attr("width", scalesDict["xScale"].rangeBand())
-					.attr("height", function(d) { return chartInnerHeight - scalesDict["yScale"](d.value); })
+					.attr("x", function(d) { return scalesDict.xScale(d.key); })
+					.attr("y", function(d) { return scalesDict.yScale(d.value); })
+					.attr("width", scalesDict.xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - scalesDict.yScale(d.value); })
 					.on("mouseenter", function(d,i) {
 						d3.selectAll("#"+idString+d.key)
 							.style("stroke", "black");
@@ -412,10 +412,10 @@
 						}
 						return selectedDict[d3.select(this).attr("id")];
 					})
-					.attr("x", function(d) { return scalesDict["xScale"](d.key); })
-					.attr("y", function(d) { return scalesDict["yScale"](d.value); })
-					.attr("width", scalesDict["xScale"].rangeBand())
-					.attr("height", function(d) { return chartInnerHeight - scalesDict["yScale"](d.value); })
+					.attr("x", function(d) { return scalesDict.xScale(d.key); })
+					.attr("y", function(d) { return scalesDict.yScale(d.value); })
+					.attr("width", scalesDict.xScale.rangeBand())
+					.attr("height", function(d) { return chartInnerHeight - scalesDict.yScale(d.value); })
 					.on("mouseenter", function(d,i) {
 						d3.selectAll("#"+idString+d.key)
 							.style("stroke", "black");
@@ -471,13 +471,13 @@
 					});
 
 			var xAxis = d3.svg.axis()
-				.scale(scalesDict["xScale"])
+				.scale(scalesDict.xScale)
 				.tickSize(-chartInnerHeight)
 				.orient("bottom");
 			xAxisGroup.call(xAxis);
 
 			var yAxis = d3.svg.axis()
-				.scale(scalesDict["yScale"])
+				.scale(scalesDict.yScale)
 				.tickSize(-chartInnerWidth)
 				.orient("left");
 			yAxisGroup.call(yAxis);

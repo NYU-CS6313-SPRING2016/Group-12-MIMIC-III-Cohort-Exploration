@@ -25,14 +25,6 @@
 				overflow-x:scroll;
 				overflow-y:scroll;
 			}
-			#scrolldiv {
-				height: 457px;
-			}
-			#diagnosislist {
-				width: 100%;
-				padding: 0;
-				margin: 0;
-			}
 			.mainchart {
 				width: 912px;
 				height: 300px;
@@ -40,6 +32,9 @@
 			.bottomchart {
 				width: 453px;
 				height: 150px;
+			}
+			.topchart rect {
+				cursor: pointer;
 			}
 			.topchart g.bg rect.unselected {
 				fill: lightgray;
@@ -62,6 +57,23 @@
 			.domain {
 				fill: none;
 				stroke: #888;
+			}
+			#scrolldiv {
+				height: 457px;
+			}
+			#diagnosislist {
+				width: 100%;
+				padding: 0;
+				margin: 0;
+			}
+			#diagnosislist tr.header {
+				text-align: left;
+			}
+			#diagnosislist tr.diagnosis {
+				cursor: pointer;
+			}
+			#diagnosislist td.icd9 {
+				width: 65px;
 			}
 			#tooltip {
 				position: absolute;
@@ -307,11 +319,26 @@
 			diagnosisList.selectAll("tr")
 				.remove();
 
-			var tr = diagnosisList.selectAll("tr")
+			var headTr = diagnosisList
+				.append("tr")
+				.attr("class", "header")
+			headTr
+				.append("th")
+				.text("ICD-9")
+			headTr
+				.append("th")
+				.text("Description")
+
+			var tr = diagnosisList.selectAll("tr.diagnosis")
 				.data(selectedDataset, function(d) { return d.key; })
 				.enter()
 				.append("tr")
+				.attr("class", "diagnosis")
 				.on("mouseenter", function(d,i) {
+					d3.select(this).style({
+						background: "cornflowerblue",
+						color: "white"
+					})
 					d3.select("#tooltip").style({
 						top: d3.event.clientY+5,
 						left: d3.event.clientX+5,
@@ -321,6 +348,10 @@
 					d3.select("#tooltip").text(d.long);
 					})
 				.on("mouseleave", function(d,i) {
+					d3.select(this).style({
+						background: undefined,
+						color: undefined
+					})
 					d3.select("#tooltip").style({
 						visibility: "hidden",
 						opacity: 0
@@ -328,9 +359,11 @@
 				});
 			tr
 				.append("td")
+				.attr("class", "icd9")
 				.text(function(d) { return d.key; })
 			tr
 				.append("td")
+				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
 		}
 
@@ -572,11 +605,26 @@
 				});
 			});
 
-			var tr = diagnosisList.selectAll("tr")
+			var headTr = diagnosisList
+				.append("tr")
+				.attr("class", "header")
+			headTr
+				.append("th")
+				.text("ICD-9")
+			headTr
+				.append("th")
+				.text("Description")
+
+			var tr = diagnosisList.selectAll("tr.diagnosis")
 				.data(selectedDataset, function(d) { return d.key; })
 				.enter()
 				.append("tr")
+				.attr("class", "diagnosis")
 				.on("mouseenter", function(d,i) {
+					d3.select(this).style({
+						background: "cornflowerblue",
+						color: "white"
+					})
 					d3.select("#tooltip").style({
 						top: d3.event.clientY+5,
 						left: d3.event.clientX+5,
@@ -586,6 +634,10 @@
 					d3.select("#tooltip").text(d.long);
 					})
 				.on("mouseleave", function(d,i) {
+					d3.select(this).style({
+						background: undefined,
+						color: undefined
+					})
 					d3.select("#tooltip").style({
 						visibility: "hidden",
 						opacity: 0
@@ -593,9 +645,11 @@
 				});
 			tr
 				.append("td")
+				.attr("class", "icd9")
 				.text(function(d) { return d.key; })
 			tr
 				.append("td")
+				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
 		}
 

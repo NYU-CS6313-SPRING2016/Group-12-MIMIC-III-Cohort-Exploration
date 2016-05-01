@@ -80,6 +80,9 @@
 			#diagnosislist tr.unselected {
 
 			}
+			#diagnosisList th.icd9 {
+				width: 65px;
+			}
 			#diagnosislist td.icd9 {
 				width: 65px;
 			}
@@ -235,60 +238,53 @@
 
 		var diagnosisSelected = {};
 
+		var diagnosisFilterStrings = {};
+
+		function diagnosisFilterStringFunction(key) {
+			//return JSON.stringify({"d1":""});
+			//return "(d.d1=='"+key+"')";
+			return "(((j.d1+'')==='"+key+"')||((j.d2+'')==='"+key+"')||((j.d3+'')==='"+key+"'))";
+		};
+
 		function getDiagnosisDataset() {
 			// how many diagnoses to show in the list
 			// 50 seems fine
 			// (the whole dataset has little less than 4500)
 			var DIAGNOSIS_NUMBER = 50;
 			// how many diagnoses to consider when merging lists
-			// empirical testing suggests that factor of 4 or 5 is close to convergence point
+			// empirical testing suggests that factor of 7 is close to convergence point
 			// bigger numbers are more accurate but reduce performance by a power of 2
 			// this is because of the O(n^2) loops
-			var DIAGNOSIS_SUBLIST_NUMBER = 250;
+			var DIAGNOSIS_SUBLIST_NUMBER = DIAGNOSIS_NUMBER * 7;
 
 			var selectedPatients = diagnosisDim.top(Infinity);
 
-			/*var group = diagnosisDim.group();
-			//this forEach method could be very expensive on write.
+			// 44 thousand records but O(n)
+			var group = diagnosisDim.group();
 			group.all().forEach(function(d) {
-				//parse the json string created above
-				d.parse = JSON.parse(d.key);
+				d.key = JSON.parse(d.key);
 			});
 
-			var selectedPatients = group.all();*/
-
-			console.log(selectedPatients);
+			var selectedPatients = group.all();
 
 			var d1Dataset = d3.nest()
-				/*.key(function (d) { return d.key.d1; })*/
-				/*.key(function (d) { return d.parse.d1; })*/
-				.key(function (d) { return d.d1; })
-				.rollup(function(r) { return r.length; })
+				.key(function (d) { return d.key.d1; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
 				.entries(selectedPatients);
-
-			console.log(d1Dataset);
 
 			d1Dataset.forEach(function(d) {
 				//d.d1 = d.key;
 				d.value = d.values;
 			});
 
-			console.log(d1Dataset);
-
 			d1Dataset
 				.sort(function(a,b) { return d3.descending(a.value, b.value); });
 
-			console.log(d1Dataset);
-
 			d1Dataset = d1Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
 
-			console.log(d1Dataset);
-
 			var d2Dataset = d3.nest()
-				/*.key(function (d) { return d.key.d2; })*/
-				/*.key(function (d) { return d.parse.d2; })*/
-				.key(function (d) { return d.d2; })
-				.rollup(function(r) { return r.length; })
+				.key(function (d) { return d.key.d2; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
 				.entries(selectedPatients);
 
 			d2Dataset.forEach(function(d) {
@@ -301,13 +297,9 @@
 
 			d2Dataset = d2Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
 
-			//console.log(d2Dataset);
-
 			var d3Dataset = d3.nest()
-				/*.key(function (d) { return d.key.d3; })*/
-				/*.key(function (d) { return d.parse.d3; })*/
-				.key(function (d) { return d.d3; })
-				.rollup(function(r) { return r.length; })
+				.key(function (d) { return d.key.d3; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
 				.entries(selectedPatients);
 
 			d3Dataset.forEach(function(d) {
@@ -320,18 +312,16 @@
 
 			d3Dataset = d3Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
 
-			//console.log(d3Dataset);
-
 			var selectedDataset = [];
 
 			d1Dataset.forEach(function(d1Dict) {
-				if (d1Dict.key !== "undefined") {
+				if (d1Dict.key !== "undefined" && d1Dict.value > 0) {
 					selectedDataset.push(d1Dict);
 				}
 			});
 
 			d2Dataset.forEach(function(d2Dict) {
-				if (d2Dict.key !== "undefined") {
+				if (d2Dict.key !== "undefined" && d2Dict.value > 0) {
 					var keyFound = false;
 					selectedDataset.forEach(function(selectedDict) {
 						if (d2Dict.key === selectedDict.key) {
@@ -344,7 +334,7 @@
 			});
 
 			d3Dataset.forEach(function(d3Dict) {
-				if (d3Dict.key !== "undefined") {
+				if (d3Dict.key !== "undefined" && d3Dict.value > 0) {
 					var keyFound = false;
 					selectedDataset.forEach(function(selectedDict) {
 						if (d3Dict.key === selectedDict.key) {
@@ -379,13 +369,15 @@
 				.attr("class", "header")
 			headTr
 				.append("th")
+				.attr("class", "icd9")
 				.text("ICD-9")
 			headTr
 				.append("th")
+				.attr("class", "shortdesc")
 				.text("Description")
 
 			var tr = diagnosisList.selectAll("tr.diagnosis")
-				.data(selectedDataset, function(d) { return d.key; })
+				.data(selectedDataset, function(d,i) { return d.key; })
 				.enter()
 				.append("tr")
 				.attr("id", function(d) { return "diagnosis"+d.key; })
@@ -422,30 +414,31 @@
 					if (d3.select(this).attr("class") == "unselected") {
 						d3.select(this).attr("class", "selected");
 						diagnosisSelected[d3.select(this).attr("id")] = "selected";
-						
-						//var filter = filterStringFunction(d.key);
 
-						//filterStringsDict[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						var filter = diagnosisFilterStringFunction(d.key);
+
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
 					}
 					else {
 						d3.select(this).attr("class", "unselected");
 						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
 
-						//filterStringsDict[d3.select(this).attr("id")] = "";
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "";
 					}
 
 					// ugly ugly hack
-					/*var filterString = "";
-					for (var key in filterStringsDict) {
-						var value = filterStringsDict[key];
+					var filterString = "";
+					for (var key in diagnosisFilterStrings) {
+						var value = diagnosisFilterStrings[key];
 						filterString += value;
 					}
+
 					var filterFunction = null;
 					if (filterString !== "") {
-						filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
 					}
-					dimension.filter(filterFunction);
-					updateData();*/
+					diagnosisDim.filter(filterFunction);
+					updateData();
 				});
 			tr
 				.append("td")

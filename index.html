@@ -694,10 +694,6 @@
 				if (i == 0) { d.cumsum = d.yvalue; }
 				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
 
-				// TODO fix
-				// We have a bug!
-				// In this case since we are filtering by key we have too many individuals.
-				// Example: filter only on the OASIS 45-50 group we have 3319 but max(selectedDataset.cumsum) = 18614 - I suspect we have everyone that has a Tdeath equal to the 3316 individuals with OASIS 45-50.
 				d.cumpercentage = (d.cumsum/selectedPatients.length);
 			});
 

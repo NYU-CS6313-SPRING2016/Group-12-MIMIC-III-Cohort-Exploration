@@ -240,7 +240,6 @@
 			else if (d.OASIS > 60 && d.OASIS <= 65 ) { oasisGroup = '60-65'; }
 			else if (d.OASIS > 65 && d.OASIS <= 70 ) { oasisGroup = '65-70'; }
 			else if (d.OASIS > 70 && d.OASIS <= 75 ) { oasisGroup = '70-75'; }
-			else if (d.OASIS > 75 && d.OASIS <= 80 ) { oasisGroup = '75-80'; }
 			return oasisGroup;
 		};
 		var tdeathKeyFunction = function(d) {
@@ -702,13 +701,16 @@
 				d.cumpercentage = (d.cumsum/selectedPatients.length);
 			});
 
-			tdeathChart.select(".fg").selectAll("circle")
+			tdeathChart.select("g.fg").selectAll("circle")
+				.remove();
+
+			tdeathChart.select("g.fg").selectAll("circle")
 				.data(selectedDataset)
-				.transition()
-				.duration(1000)
-				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
-				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); 
-				});
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 		}
 
 		// UPDATE EVERYTHING
@@ -1249,34 +1251,22 @@
 				.domain([0, 1]);
 			
 			// Plot the background circles
-			var bgSelection = backgroundDataPointGroup.selectAll("circle")
+			backgroundDataPointGroup.selectAll("circle")
 				.data(dataset)
-			bgSelection.enter()
-				.append("circle");
-			bgSelection.exit()
-				.remove("circle")	
-			bgSelection.transition()
-				.attr("r", 1)
-				.attr("cx", function(d) { //console.log(d.xvalue)
-					return tdeathScales.xScale(d.xvalue)})
-				.attr("cy", function(d) { //console.log(d.yvalue)
-					return tdeathScales.yScale(d.cumpercentage)
-				});
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 			
 			// Plot the foreground circles
-			var fgSelection = foregroundDataPointGroup.selectAll("circle")
+			foregroundDataPointGroup.selectAll("circle")
 				.data(selectedDataset)
-			fgSelection.enter()
-				.append("circle");
-			fgSelection.exit()
-				.remove("circle")		
-			fgSelection.transition()
-				.attr("r", 1)
-				.attr("cx", function(d) { //console.log(d.xvalue)
-					return tdeathScales.xScale(d.xvalue)})
-				.attr("cy", function(d) { //console.log(d.yvalue)
-					return tdeathScales.yScale(d.cumpercentage)
-				});
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 			
 			// Can we add labels to these axes? Something like "Count" for y and for the admission type plot the actual admission type string for the x axis.
 			var xAxis = d3.svg.axis()

@@ -201,7 +201,13 @@
 		var tdeathDim;
 
 		var admissKeyFunction = function(d) {
-			return d.admiss;
+			var admissDesc = null;
+			if (d.admiss == 1) { admissDesc = 'Elective'; }
+			else if (d.admiss == 2) { admissDesc = 'Emergency'; }
+			else if (d.admiss == 3) { admissDesc = 'Newborn'; }
+			else if (d.admiss == 4) { admissDesc = 'Urgent'; }
+			return admissDesc;
+			//return d.admiss;
 		};
 		var ageKeyFunction = function(d) {
 			var ageGroup = null;
@@ -218,10 +224,20 @@
 			return ageGroup;
 		};
 		var sexKeyFunction = function(d) {
-			return d.sex;
+			var sexDesc = null;
+			if (d.sex === 'F') { sexDesc = 'Female'; }
+			else if (d.sex === 'M') { sexDesc = 'Male'; }
+			return sexDesc;
+			//return d.sex;
 		};
 		var mortKeyFunction = function(d) {
-			return d.mort;
+			var mortDesc = null;
+			if (d.mort == 0) { mortDesc = 'Survived'; }
+			else if (d.mort == 5 || d.mort == 4 ) { mortDesc = 'ICU Mort'; }
+			else if (d.mort == 5 || d.mort == 4 || d.mort == 3 || d.mort == 2) { mortDesc = 'Hospital Mort'; }
+			else if (d.mort == 1 || d.mort == 3 || d.mort == 5) { mortDesc = '30day Mort'; }
+			return mortDesc;
+			//return d.mort;
 		};
 		//diagnosisKeyFunction too complicated
 		var oasisKeyFunction = function(d) {
@@ -287,7 +303,13 @@
 		//tdeathFilterStrings not applicable (nothing to click)
 
 		function admissFilterStringFunction(key) {
-			return "(d=="+key+")";
+			var admissCode = null;
+			if (key === 'Elective') { admissCode = 1; }
+			else if (key === 'Emergency') { admissCode = 2; }
+			else if (key === 'Newborn') { admissCode = 3; }
+			else if (key === 'Urgent') { admissCode = 4; }
+			return "(d=="+admissCode+")";
+			//return "(d=="+key+")";
 		};
 		function ageFilterStringFunction(key) {
 			var ageGroupString = key;
@@ -298,10 +320,18 @@
 			else { return "((d>"+firstNum+")&&("+"d<="+secondNum+"))"; }
 		};
 		function sexFilterStringFunction(key) {
-			return "(d=='"+key+"')";
+			var sexCode = null;
+			if (key === 'Female') { sexCode = 'F'; }
+			else if (key === 'Male') { admissCode = 'M'; }
+			return "(d=="+sexCode+")";
+			//return "(d=='"+key+"')";
 		};
 		function mortFilterStringFunction(key) {
-			return "(d=="+key+")";
+			if (key === 'Survived') { return "d==0"; }
+			else if (key === 'ICU Mort') { return "d==5||d==4"; }
+			else if (key === 'Hospital Mort') { return "d==5||d==4||d==3||d==2"; }
+			else if (key === '30day Mort') { return "d==1||d==3||d==5"; }
+			//return "(d=="+key+")";
 		};
 		function diagnosisFilterStringFunction(key) {
 			//return JSON.stringify({"d1":""});

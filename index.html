@@ -188,6 +188,9 @@
 		
 		var nodes = [],
         	    links = [];
+        	
+        	var nodeNum;
+        	var parent;
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -845,6 +848,19 @@
 				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 		}
+		
+		function updateFlowChart()
+	        {
+	            // can't figure out why the link isn't showing up in the vis, shows up in sample program I made
+	            graph.addNode(nodeNum);
+	            graph.addLink(parent, String(nodeNum));
+	            nodeNum += 1;
+	            var adult = String(nodeNum);
+	            graph.addNode(nodeNum)
+	            nodeNum += 1;
+	            graph.addLink(parent, String(nodeNum))
+	            parent = adult;
+	        }
 
 		// UPDATE EVERYTHING
 		function updateData() {
@@ -858,6 +874,7 @@
 
 			updateOasisChart();
 			updateTdeathChart();
+			updateFlowChart();
 		}
 
 		// RENDER CHART FUNCTIONS
@@ -2040,8 +2057,11 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-            graph = new renderFilterGraph("#flowchart");
-            graph.addNode("root");
+            		parent = "root";
+            		nodeNum = 1;
+            		graph = new renderFilterGraph("#flowchart");
+            		graph.addNode(parent);
+            		
 		}
 
 		// READ IN EXTERNAL FILES

@@ -956,7 +956,36 @@
 
                     var nodeEnter = node.enter().append("g")
                         .attr("class", "node")
-                        .call(force.drag);
+                        .call(force.drag)
+                        .on("mouseenter", function(d,i) { 
+                            //work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
+                            var g = d3.select(this); // The node
+                            // The class is used to remove the additional text later
+                            var info = g.append('text')
+                                .classed('info', true)
+                                .attr('x', 20)
+                                .attr('y', 10)
+                                .text(function(d) {return d.id});
+                            /*d3.selectAll("#tooltip")
+                                .style("stroke", "black");
+                            d3.select("#tooltip").style({
+                                top: d3.event.clientY+5,
+                                left: d3.event.clientX+5,
+                                visibility: "visible",
+                                opacity: 1
+                            });
+                            d3.select("#tooltip").text(function(d) {return d.id});*/
+                        })
+                        .on("mouseleave", function(d,i) {
+                            // Remove the info text on mouse out.
+                            d3.select(this).select('text.info').remove();
+                            /*d3.selectAll("#tooltip")
+                                .style("stroke", undefined);
+                            d3.select("#tooltip").style({
+                                visibility: "hidden",
+                                opacity: 0
+                            });*/
+                        });
 
                     /*nodeEnter.append("image")
                         .attr("class", "circle")
@@ -978,6 +1007,7 @@
                         .attr("stroke", "steelblue")
                         .style("fill", "#fff")
                         .attr("r", 10);
+                        //.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
                         //.attr("strokewidth", 3px);
 
 

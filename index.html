@@ -662,37 +662,6 @@
 						visibility: "hidden",
 						opacity: 0
 					});
-				})
-				.on("click", function(d,i) {
-					if (d3.select(this).attr("class") == "unselected") {
-						d3.select(this).attr("class", "selected");
-						diagnosisSelected[d3.select(this).attr("id")] = "selected";
-
-						var filter = diagnosisFilterStringFunction(d.key);
-
-						diagnosisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
-					}
-					else {
-						d3.select(this).attr("class", "unselected");
-						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
-
-						diagnosisFilterStrings[d3.select(this).attr("id")] = "";
-					};
-
-					// ugly ugly hack
-					var filterString = "";
-					for (var key in diagnosisFilterStrings) {
-						var value = diagnosisFilterStrings[key];
-						filterString += value;
-					}
-
-					var filterFunction = null;
-					if (filterString !== "") {
-						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
-					}
-
-					diagnosisDim.filter(filterFunction);
-					updateModData(selectedDataset);
 				});
 
 			tr

@@ -577,6 +577,38 @@
 				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
 		}
+		
+		function maxObjects(obj)
+	        {
+	            var max = undefined;
+	            for( var el in obj ) 
+	            {
+	                if( obj.hasOwnProperty( el ) ) 
+	                {
+	                    if (max == undefined){
+	                        max = obj[el]}
+	                    else if (obj[el] > max){
+	                        max = obj[el]}
+	                  //sum += parseFloat( obj[el] );
+	                }
+	            }
+	            //console.log(max)
+	          return max;
+	        }
+        
+	        function cohortPatientTotal()
+	        {
+	            /*var admissSelectedPatientNumbers = {};
+	            var ageSelectedPatientNumbers = {};
+	            var sexSelectedPatientNumbers = {};
+	            var mortSelectedPatientNumbers = {};*/
+	            var a = maxObjects(admissSelectedPatientNumbers)
+	            var b = maxObjects(ageSelectedPatientNumbers)
+	            var c = maxObjects(sexSelectedPatientNumbers)
+	            var d = maxObjects(mortSelectedPatientNumbers)
+	            return Math.max(a,b,c,d);
+	            
+	        }
 
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
@@ -852,12 +884,15 @@
 		function updateFlowChart()
 	        {
 	            // can't figure out why the link isn't showing up in the vis, shows up in sample program I made
+	            
+	            var patientTotal = cohortPatientTotal()
+	            var parNode = nodeNum
+	            nodeNum = patientTotal
 	            graph.addNode(nodeNum);
 	            graph.addLink(parent, String(nodeNum));
-	            nodeNum += 1;
+	            nodeNum = parNode - nodeNum;
 	            var adult = String(nodeNum);
 	            graph.addNode(nodeNum)
-	            nodeNum += 1;
 	            graph.addLink(parent, String(nodeNum))
 	            parent = adult;
 	        }
@@ -995,18 +1030,25 @@
                         .attr("width", "16px")
                         .attr("height", "16px");*/
 
-                    nodeEnter.append("text")
+                    /*nodeEnter.append("text")
                         .attr("class", "nodetext")
                         .attr("dx", 12)
                         .attr("dy", ".35em")
                         .style("opacity", 1)
                         .style("color", "black")
-                        .text(function(d) {return d.id});
+                        .text(function(d) {return d.id});*/
+                    
+                    var sizeScale = d3.scale.linear()
+	                    .range([20,1000])
+	                    .domain([0, patients.length]);
+                
+                    var patientTotal = cohortPatientTotal()
 
                     nodeEnter.append("circle")
                         .attr("stroke", "steelblue")
                         .style("fill", "#fff")
-                        .attr("r", 10);
+                        //.attr("r", 10);
+                        .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
                         //.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
                         //.attr("strokewidth", 3px);
 
@@ -2087,8 +2129,8 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-            		parent = "root";
-            		nodeNum = 1;
+            		parent = String(patients.length);
+            		nodeNum = patients.length;
             		graph = new renderFilterGraph("#flowchart");
             		graph.addNode(parent);
             		

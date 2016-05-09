@@ -560,6 +560,26 @@
 						var value = diagnosisFilterStrings[key];
 						filterString += value;
 					}
+<<<<<<< HEAD
+
+					var filterFunction = null;
+					if (filterString !== "") {
+						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
+					}
+					diagnosisDim.filter(filterFunction);
+					updateData();
+				});
+			tr
+				.append("td")
+				.attr("class", "icd9")
+				.text(function(d) { return d.key; })
+			tr
+				.append("td")
+				.attr("class", "shortdesc")
+				.text(function(d) { return d.short; })
+		}
+
+=======
 
 					var filterFunction = null;
 					if (filterString !== "") {
@@ -610,6 +630,7 @@
 	            
 	        }
 
+>>>>>>> origin/master
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
 			var dataset = d3.nest()
@@ -834,6 +855,7 @@
 				})
 				.attr("y", function(d) { return oasisScales.yScale(d.value); })
 				.attr("height", function(d) { return bottomChartInnerHeight - oasisScales.yScale(d.value); });
+<<<<<<< HEAD
 		}
 		
 		function updateTdeathChart() {
@@ -879,6 +901,55 @@
 				.attr("r", 2)
 				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
+=======
+>>>>>>> origin/master
+		}
+		
+		function updateTdeathChart() {
+			var selectedPatients = tdeathDim.top(Infinity);
+			
+			var selectedDataset = d3.nest()
+				.key(tdeathKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+			
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+			
+			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
+			
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.yvalue = d.values;
+				d.xvalue = parseFloat(d.key);
+
+				tdeathSelectedPatientNumbers[d.key] = d.yvalue;
+			});
+
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.xvalue, b.xvalue) });
+			
+			selectedDataset.forEach(function(d, i) {
+				// d for data, i for index
+
+				if (i == 0) { d.cumsum = d.yvalue; }
+				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
+
+				d.cumpercentage = (d.cumsum/selectedPatients.length);
+			});
+
+<<<<<<< HEAD
+=======
+			tdeathChart.select("g.fg").selectAll("circle")
+				.remove();
+
+			tdeathChart.select("g.fg").selectAll("circle")
+				.data(selectedDataset)
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 		}
 		
 		function updateFlowChart()
@@ -897,6 +968,7 @@
 	            parent = adult;
 	        }
 
+>>>>>>> origin/master
 		// UPDATE EVERYTHING
 		function updateData() {
 			updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
@@ -909,6 +981,11 @@
 
 			updateOasisChart();
 			updateTdeathChart();
+<<<<<<< HEAD
+		}
+
+		// RENDER CHART FUNCTIONS
+=======
 			updateFlowChart();
 		}
 
@@ -1072,6 +1149,7 @@
                 update();
             }
         
+>>>>>>> origin/master
 		function renderTopChart(chart, dimension, keyFunction, orderFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
 			var dataset = d3.nest()
 				.key(keyFunction)
@@ -1316,6 +1394,7 @@
 			tempDataset.forEach(function(d) {
 				//d.age = d.key;
 				d.value = d.values;
+<<<<<<< HEAD
 
 				if (d.key.indexOf('S') != -1) {
 					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
@@ -1338,6 +1417,30 @@
 				}
 			});
 
+=======
+
+				if (d.key.indexOf('S') != -1) {
+					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
+					else { mortPatientNumbers['Survived'] += d.value; }
+				}
+				
+				if (d.key.indexOf('I') != -1) {
+					if (mortPatientNumbers['ICU_Mort'] === undefined) { mortPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortPatientNumbers['ICU_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('H') != -1) {
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('3') != -1) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+				}
+			});
+
+>>>>>>> origin/master
 			var dataset = [];
 
 			dataset.push({'key':'Survived', 'value':mortPatientNumbers['Survived']});
@@ -2129,11 +2232,14 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
+<<<<<<< HEAD
+=======
             		parent = String(patients.length);
             		nodeNum = patients.length;
             		graph = new renderFilterGraph("#flowchart");
             		graph.addNode(parent);
             		
+>>>>>>> origin/master
 		}
 
 		// READ IN EXTERNAL FILES

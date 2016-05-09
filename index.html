@@ -777,25 +777,7 @@
 						var value = diagnosisFilterStrings[key];
 						filterString += value;
 					}
-
-					var filterFunction = null;
-					if (filterString !== "") {
-						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
-					}
-					diagnosisDim.filter(filterFunction);
-					updateData();
-				});
-			tr
-				.append("td")
-				.attr("class", "icd9")
-				.text(function(d) { return d.key; })
-			tr
-				.append("td")
-				.attr("class", "shortdesc")
-				.text(function(d) { return d.short; })
-		}
-
-
+					
 					var filterFunction = null;
 					if (filterString !== "") {
 						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");

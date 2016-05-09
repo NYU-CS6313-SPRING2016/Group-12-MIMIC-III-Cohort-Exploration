@@ -1,0 +1,1952 @@
+<html>
+	<head>
+		<title>MIMIC-III Cohort Exploration</title>
+		<style>
+			body {
+				font-family: sans-serif;
+			}
+			.vis {
+				width: 1224px;
+				height: 618px;
+			}
+			.chartarea {
+				display: inline;
+				float: left;
+				margin: 2px;
+				border: solid 1px gray;
+			}
+			.topchart {
+				width: 300px;
+				height: 150px;
+			}
+			#diagnosislistchartarea {
+				width: 300px;
+				height: 456px;
+				overflow-x:scroll;
+				overflow-y:scroll;
+			}
+			.mainchart {
+				width: 912px;
+				height: 300px;
+			}
+			.bottomchart {
+				width: 453px;
+				height: 150px;
+			}
+			.topchart rect {
+				cursor: pointer;
+			}
+			.topchart g.bg rect.unselected {
+				fill: lightgray;
+			}
+			.topchart g.bg rect.selected {
+				fill: gray;
+			}
+			.topchart g.fg rect.unselected {
+				fill: cornflowerblue;
+			}
+			.topchart g.fg rect.selected {
+				fill: orange;
+			}
+			#oasischart rect {
+				cursor: pointer;
+			}
+			#oasischart g.bg rect.unselected {
+				fill: lightgray;
+			}
+			#oasischart g.bg rect.selected {
+				fill: gray;
+			}
+			#oasischart g.fg rect.unselected {
+				fill: cornflowerblue;
+			}
+			#oasischart g.fg rect.selected {
+				fill: orange;
+			}
+			#tdeathchart g.bg circle {
+				fill: gray;
+			}
+			#tdeathchart g.fg circle {
+				fill: cornflowerblue;
+			}
+			.tick {
+				font-size: 7;
+			}
+			.tick line {
+				stroke: #ccc;
+			}
+			.domain {
+				fill: none;
+				stroke: #888;
+			}
+			#scrolldiv {
+				height: 457px;
+			}
+			#diagnosislist {
+				width: 100%;
+				padding: 0;
+				margin: 0;
+			}
+			#diagnosislist tr {
+				cursor: pointer;
+			}
+			#diagnosislist tr.header {
+				cursor: auto;
+				text-align: left;
+			}
+			#diagnosislist tr.selected {
+				background: orange;
+				text-decoration: underline;
+			}
+			#diagnosislist tr.unselected {
+
+			}
+			#diagnosisList th.icd9 {
+				width: 65px;
+			}
+			#diagnosislist td.icd9 {
+				width: 65px;
+			}
+			#tooltip {
+				position: absolute;
+				top: 0;
+				left: 0;
+				background-color: rgba(255,255,255,0.9);
+				padding: 5;
+				border: solid 1px black;
+				visibility: hidden;
+				transition: all 0.5s;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="vis">
+			<div class="chartarea">
+				<svg class="topchart" id="admisschart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="topchart" id="agechart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="topchart" id="sexchart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="topchart" id="mortchart">
+				</svg>
+			</div>
+			<br>
+			<div class="chartarea" id="diagnosislistchartarea">
+				<div id="scrolldiv">
+					<table id="diagnosislist">
+					</table>
+				</div>
+			</div>
+			<div class="chartarea">
+				<svg class="mainchart" id="flowchart">
+				</svg>
+			</div>
+			<br>
+			<div class="chartarea">
+				<svg class="bottomchart" id="oasischart">
+				</svg>
+			</div>
+			<div class="chartarea">
+				<svg class="bottomchart" id="tdeathchart">
+				</svg>
+			</div>
+		</div>
+		<div id="tooltip">Toolip</div>
+	</body>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
+	<script>
+		// CONSTANTS
+		var topChartWidth = 300;
+		var topChartHeight = 150;
+
+		var bottomChartWidth = 453;
+		var bottomChartHeight = 150;
+
+		var chartMargin = {top:20,right:20,bottom:20,left:40};
+
+		// CALCULATED CONSTANTS
+		var topChartInnerWidth = topChartWidth-chartMargin.left-chartMargin.right;
+		var topChartInnerHeight = topChartHeight-chartMargin.top-chartMargin.bottom;
+
+		var bottomChartInnerWidth = bottomChartWidth-chartMargin.left-chartMargin.right;
+		var bottomChartInnerHeight = bottomChartHeight-chartMargin.top-chartMargin.bottom;
+
+		// VARABLE DECLARATIONS
+		var icd9;
+		var patients;
+		var cf;
+
+		var admissChart = d3.select("#admisschart");
+		var ageChart = d3.select("#agechart");
+		var sexChart = d3.select("#sexchart");
+		var mortChart = d3.select("#mortchart");
+		var diagnosisList = d3.select("#diagnosislist");
+		var oasisChart = d3.select("#oasischart");
+		var tdeathChart = d3.select("#tdeathchart");
+		
+		var admissDim;
+		var ageDim;
+		var sexDim;
+		//var mortDim;
+		var mortDimSurvived;
+		var mortDimICUMort;
+		var mortDimHospMort;
+		var mortDim30dayMort;
+		var diagnosisDim;
+		var oasisDim;
+		var tdeathDim;
+
+		var admissKeyFunction = function(d) {
+			var admissDesc = null;
+			if (d.admiss == 1) { admissDesc = 'Elective'; }
+			else if (d.admiss == 2) { admissDesc = 'Emergency'; }
+			else if (d.admiss == 3) { admissDesc = 'Newborn'; }
+			else if (d.admiss == 4) { admissDesc = 'Urgent'; }
+			return admissDesc;
+			//return d.admiss;
+		};
+		var ageKeyFunction = function(d) {
+			var ageGroup = null;
+			if (d.age <= 10) { ageGroup = '0-10'; }
+			else if (d.age > 10 && d.age <= 20 ) { ageGroup = '10-20'; }
+			else if (d.age > 20 && d.age <= 30 ) { ageGroup = '20-30'; }
+			else if (d.age > 30 && d.age <= 40 ) { ageGroup = '30-40'; }
+			else if (d.age > 40 && d.age <= 50 ) { ageGroup = '40-50'; }
+			else if (d.age > 50 && d.age <= 60 ) { ageGroup = '50-60'; }
+			else if (d.age > 60 && d.age <= 70 ) { ageGroup = '60-70'; }
+			else if (d.age > 70 && d.age <= 80 ) { ageGroup = '70-80'; }
+			else if (d.age > 80 && d.age <= 90 ) { ageGroup = '80-90'; }
+			else if (d.age > 90 && d.age <= 100 ) { ageGroup = '90-100'; }
+			return ageGroup;
+		};
+		var sexKeyFunction = function(d) {
+			var sexDesc = null;
+			if (d.sex === 'F') { sexDesc = 'Female'; }
+			else if (d.sex === 'M') { sexDesc = 'Male'; }
+			return sexDesc;
+			//return d.sex;
+		};
+		var mortKeyFunction = function(d) {
+			// this is the problem! chooses only one
+			//var mortDesc = null;
+			//if (d.mort == 0) { mortDesc = 'Survived'; }
+			//else if (d.mort == 5 || d.mort == 4 ) { mortDesc = 'ICU Mort'; }
+			//else if (d.mort == 5 || d.mort == 4 || d.mort == 3 || d.mort == 2) { mortDesc = 'Hospital Mort'; }
+			//else if (d.mort == 1 || d.mort == 3 || d.mort == 5) { mortDesc = '30day Mort'; }
+			//return mortDesc;
+			return d.mort;
+		};
+		//diagnosisKeyFunction too complicated
+		var oasisKeyFunction = function(d) {
+			var oasisGroup = 'null';
+			if (d.OASIS <= 10) { oasisGroup = '0-10'; }
+			else if (d.OASIS > 10 && d.OASIS <= 15 ) { oasisGroup = '10-15'; }
+			else if (d.OASIS > 15 && d.OASIS <= 20 ) { oasisGroup = '15-20'; }
+			else if (d.OASIS > 20 && d.OASIS <= 25 ) { oasisGroup = '20-25'; }
+			else if (d.OASIS > 25 && d.OASIS <= 30 ) { oasisGroup = '25-30'; }
+			else if (d.OASIS > 30 && d.OASIS <= 35 ) { oasisGroup = '30-35'; }
+			else if (d.OASIS > 35 && d.OASIS <= 40 ) { oasisGroup = '35-40'; }
+			else if (d.OASIS > 40 && d.OASIS <= 45 ) { oasisGroup = '40-45'; }
+			else if (d.OASIS > 45 && d.OASIS <= 50 ) { oasisGroup = '45-50'; }
+			else if (d.OASIS > 50 && d.OASIS <= 55 ) { oasisGroup = '50-55'; }
+			else if (d.OASIS > 55 && d.OASIS <= 60 ) { oasisGroup = '55-60'; }
+			else if (d.OASIS > 60 && d.OASIS <= 65 ) { oasisGroup = '60-65'; }
+			else if (d.OASIS > 65 && d.OASIS <= 70 ) { oasisGroup = '65-70'; }
+			else if (d.OASIS > 70 && d.OASIS <= 75 ) { oasisGroup = '70-75'; }
+			return oasisGroup;
+		};
+		var tdeathKeyFunction = function(d) {
+			return d.Tdeath;
+		};
+
+		var admissOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
+		var ageOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
+		var sexOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
+		var mortOrderFunction = function(a,b) {
+			var orderArray = ['Survived','ICU_Mort','Hospital_Mort','30day_Mort'];
+			return d3.ascending(orderArray.indexOf(a.key), orderArray.indexOf(b.key));
+		};
+		var diagnosisOrderFunction = function(a,b) { return d3.descending(a.value, b.value); };
+		var oasisOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
+		//tdeathOrderFunction not applicable
+
+		var admissPatientNumbers = {};
+		var agePatientNumbers = {};
+		var sexPatientNumbers = {};
+		var mortPatientNumbers = {};
+		//diagnosisPatientNumbers not applicable
+		var oasisPatientNumbers = {};
+		var tdeathPatientNumbers = {};
+		
+		var admissSelectedPatientNumbers = {};
+		var ageSelectedPatientNumbers = {};
+		var sexSelectedPatientNumbers = {};
+		var mortSelectedPatientNumbers = {};
+		//diagnosisSelectedPatientNumbers not applicable
+		var oasisSelectedPatientNumbers = {};
+		var tdeathSelectedPatientNumbers = {};
+		
+		var admissScales = {};
+		var ageScales = {};
+		var sexScales = {};
+		var mortScales = {};
+		//diagnosisScales not applicable (not a chart)
+		var oasisScales = {};
+		var tdeathScales = {};
+
+		var admissSelected = {};
+		var ageSelected = {};
+		var sexSelected = {};
+		var mortSelected = {};
+		var diagnosisSelected = {};
+		var oasisSelected = {};
+		//tdeathSelected not applicable (nothing to click)
+
+		var admissFilterStrings = {};
+		var ageFilterStrings = {};
+		var sexFilterStrings = {};
+		var mortFilterStrings = {};
+		var diagnosisFilterStrings = {};
+		var oasisFilterStrings = {};
+		//tdeathFilterStrings not applicable (nothing to click)
+
+		function admissFilterStringFunction(key) {
+			var admissCode = null;
+			if (key === 'Elective') { admissCode = 1; }
+			else if (key === 'Emergency') { admissCode = 2; }
+			else if (key === 'Newborn') { admissCode = 3; }
+			else if (key === 'Urgent') { admissCode = 4; }
+			return "(d=="+admissCode+")";
+			//return "(d=="+key+")";
+		};
+		function ageFilterStringFunction(key) {
+			var ageGroupString = key;
+			var hyphenIndex = ageGroupString.indexOf("-");
+			var firstNum = ageGroupString.substring(0,hyphenIndex);
+			var secondNum = ageGroupString.substring(hyphenIndex+1);
+			if (firstNum == 0) { return "(d<="+secondNum+")"; }
+			else { return "((d>"+firstNum+")&&("+"d<="+secondNum+"))"; }
+		};
+		function sexFilterStringFunction(key) {
+			var sexCode = null;
+			if (key === 'Female') { sexCode = 'F'; }
+			else if (key === 'Male') { sexCode = 'M'; }
+			return "(d=='"+sexCode+"')";
+			//return "(d=='"+key+"')";
+		};
+		function mortFilterStringFunction(key) {
+			/*if (key === 'Survived') { return "d==0"; }
+			else if (key === 'ICU_Mort') { return "d==5||d==4"; }
+			else if (key === 'Hospital_Mort') { return "d==5||d==4||d==3||d==2"; }
+			else if (key === '30day_Mort') { return "d==1||d==3||d==5"; }*/
+			return "(d=="+key+")";
+		};
+		function diagnosisFilterStringFunction(key) {
+			//return JSON.stringify({"d1":""});
+			//return "(d.d1=='"+key+"')";
+			return "(((j.d1+'')==='"+key+"')||((j.d2+'')==='"+key+"')||((j.d3+'')==='"+key+"'))";
+		};
+		function oasisFilterStringFunction(key) {
+			var oasisGroupString = key;
+			var hyphenIndex = oasisGroupString.indexOf("-");
+			var firstNum = oasisGroupString.substring(0,hyphenIndex);
+			var secondNum = oasisGroupString.substring(hyphenIndex+1);
+			if (firstNum == 0) { return "(d<="+secondNum+")"; }
+			else { return "((d>"+firstNum+")&&("+"d<="+secondNum+"))"; }
+		};
+		//tdeathFilterStringFunction not applicable (nothing to click)
+
+		// HELPER FUNCTIONS
+		// used for updates and renders
+		function getDiagnosisDataset() {
+			// how many diagnoses to show in the list
+			// 50 seems fine
+			// (the whole dataset has little less than 4500)
+			var DIAGNOSIS_NUMBER = 50;
+			// how many diagnoses to consider when merging lists
+			// empirical testing suggests that factor of 7 is close to convergence point
+			// bigger numbers are more accurate but reduce performance by a power of 2
+			// this is because of the O(n^2) loops
+			var DIAGNOSIS_SUBLIST_NUMBER = DIAGNOSIS_NUMBER * 7;
+
+			var selectedPatients = diagnosisDim.top(Infinity);
+
+			// 44 thousand records but O(n)
+			var group = diagnosisDim.group();
+			group.all().forEach(function(d) {
+				d.key = JSON.parse(d.key);
+			});
+
+			var selectedPatients = group.all();
+
+			var d1Dataset = d3.nest()
+				.key(function (d) { return d.key.d1; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
+				.entries(selectedPatients);
+
+			d1Dataset.forEach(function(d) {
+				//d.d1 = d.key;
+				d.value = d.values;
+			});
+
+			d1Dataset
+				.sort(function(a,b) { return d3.descending(a.value, b.value); });
+
+			d1Dataset = d1Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
+
+			var d2Dataset = d3.nest()
+				.key(function (d) { return d.key.d2; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
+				.entries(selectedPatients);
+
+			d2Dataset.forEach(function(d) {
+				//d.d1 = d.key;
+				d.value = d.values;
+			});
+
+			d2Dataset
+				.sort(function(a,b) { return d3.descending(a.value, b.value); });
+
+			d2Dataset = d2Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
+
+			var d3Dataset = d3.nest()
+				.key(function (d) { return d.key.d3; })
+				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
+				.entries(selectedPatients);
+
+			d3Dataset.forEach(function(d) {
+				//d.d1 = d.key;
+				d.value = d.values;
+			});
+
+			d3Dataset
+				.sort(function(a,b) { return d3.descending(a.value, b.value); });
+
+			d3Dataset = d3Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
+
+			var selectedDataset = [];
+
+			d1Dataset.forEach(function(d1Dict) {
+				if (d1Dict.key !== "undefined" && d1Dict.value > 0) {
+					selectedDataset.push(d1Dict);
+				}
+			});
+
+			d2Dataset.forEach(function(d2Dict) {
+				if (d2Dict.key !== "undefined" && d2Dict.value > 0) {
+					var keyFound = false;
+					selectedDataset.forEach(function(selectedDict) {
+						if (d2Dict.key === selectedDict.key) {
+							keyFound = true;
+							selectedDict.value += d2Dict.value;
+						}
+					});
+					if (!keyFound) { selectedDataset.push(d2Dict); }
+				}
+			});
+
+			d3Dataset.forEach(function(d3Dict) {
+				if (d3Dict.key !== "undefined" && d3Dict.value > 0) {
+					var keyFound = false;
+					selectedDataset.forEach(function(selectedDict) {
+						if (d3Dict.key === selectedDict.key) {
+							keyFound = true;
+							selectedDict.value += d3Dict.value;
+						}
+					});
+					if (!keyFound) { selectedDataset.push(d3Dict); }
+				}
+			});
+
+			selectedDataset
+				.sort(diagnosisOrderFunction);
+
+			selectedDataset = selectedDataset.slice(0,DIAGNOSIS_NUMBER);
+
+			icd9.forEach(function(dict) {
+				selectedDataset.forEach(function(selectedDict) {
+					if (selectedDict.key === dict.icd9) {
+						selectedDict.short = dict.short;
+						selectedDict.long = dict.long;
+					}
+				});
+			});
+
+			return selectedDataset;
+		}
+
+		function buildDiagnosisList(selectedDataset) {
+			var headTr = diagnosisList
+				.append("tr")
+				.attr("class", "header")
+			headTr
+				.append("th")
+				.attr("class", "icd9")
+				.text("ICD-9")
+			headTr
+				.append("th")
+				.attr("class", "shortdesc")
+				.text("Description")
+
+			var tr = diagnosisList.selectAll("tr.diagnosis")
+				.data(selectedDataset, function(d,i) { return d.key; })
+				.enter()
+				.append("tr")
+				.attr("id", function(d) { return "diagnosis"+d.key; })
+				.attr("class", function(d) {
+					if (diagnosisSelected[d3.select(this).attr("id")] === undefined) {
+						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return diagnosisSelected[d3.select(this).attr("id")];
+				})
+				.on("mouseenter", function(d,i) {
+					d3.select(this).style({
+						background: "cornflowerblue",
+						color: "white"
+					})
+					d3.select("#tooltip").style({
+						top: d3.event.clientY+5,
+						left: d3.event.clientX+5,
+						visibility: "visible",
+						opacity: 1
+					});
+					d3.select("#tooltip").text(d.long+" ("+ d.value+")");
+					})
+				.on("mouseleave", function(d,i) {
+					d3.select(this).style({
+						background: undefined,
+						color: undefined
+					})
+					d3.select("#tooltip").style({
+						visibility: "hidden",
+						opacity: 0
+					});
+				})
+				.on("click", function(d,i) {
+					if (d3.select(this).attr("class") == "unselected") {
+						d3.select(this).attr("class", "selected");
+						diagnosisSelected[d3.select(this).attr("id")] = "selected";
+
+						var filter = diagnosisFilterStringFunction(d.key);
+
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+					}
+					else {
+						d3.select(this).attr("class", "unselected");
+						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
+
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "";
+					}
+
+					// ugly ugly hack
+					var filterString = "";
+					for (var key in diagnosisFilterStrings) {
+						var value = diagnosisFilterStrings[key];
+						filterString += value;
+					}
+
+					var filterFunction = null;
+					if (filterString !== "") {
+						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
+					}
+					diagnosisDim.filter(filterFunction);
+					updateData();
+				});
+			tr
+				.append("td")
+				.attr("class", "icd9")
+				.text(function(d) { return d.key; })
+			tr
+				.append("td")
+				.attr("class", "shortdesc")
+				.text(function(d) { return d.short; })
+		}
+
+		// UPDATE CHART FUNCTIONS
+		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
+			var dataset = d3.nest()
+				.key(keyFunction)
+				.rollup(function(r) { return 0; })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+			});
+
+			var selectedPatients = dimension.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(keyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+			});
+
+			dataset.forEach(function(dict) {
+				var keyFound = false;
+				selectedDataset.forEach(function(selectedDict) {
+					if (dict.key === selectedDict.key) { keyFound = true; }
+				});
+				if (!keyFound) { selectedDataset.push(dict); }
+			});
+
+			selectedDataset.forEach(function(d) {
+				selectedPatientNumbersDict[d.key] = d.value;
+			});
+
+			selectedDataset
+				.sort(orderFunction);
+
+			chart.select(".bg").selectAll("rect")
+				.attr("class", function(d) {
+					if (selectedDict[d3.select(this).attr("id")] === undefined) {
+						selectedDict[d3.select(this).attr("id")] = "unselected";
+					}
+					return selectedDict[d3.select(this).attr("id")];
+				})
+
+			chart.select(".fg").selectAll("rect")
+				.data(selectedDataset)
+				.transition()
+				.duration(1000)
+				.attr("class", function(d) {
+					if (selectedDict[d3.select(this).attr("id")] === undefined) {
+						selectedDict[d3.select(this).attr("id")] = "unselected";
+					}
+					return selectedDict[d3.select(this).attr("id")];
+				})
+				.attr("y", function(d) { return scalesDict.yScale(d.value); })
+				.attr("height", function(d) { return topChartInnerHeight - scalesDict.yScale(d.value); })
+		}
+
+		function updateMortChart() {
+			var selectedPatients = mortDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(mortKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				mortSelectedPatientNumbers[d.key] = d.value;
+			});
+
+			selectedDataset
+				.sort(mortOrderFunction);
+
+			/*var selectedPatients = mortDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(function (d) { return d.mortString; })
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			mortSelectedPatientNumbers = {};
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				if (d.key.indexOf('S') != -1) {
+					if (mortSelectedPatientNumbers['Survived'] === undefined) { mortSelectedPatientNumbers['Survived'] = d.value; }
+					else { mortSelectedPatientNumbers['Survived'] += d.value; }
+				}
+				
+				if (d.key.indexOf('I') != -1) {
+					if (mortSelectedPatientNumbers['ICU_Mort'] === undefined) { mortSelectedPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['ICU_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('H') != -1) {
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('3') != -1) {
+					if (mortSelectedPatientNumbers['30day_Mort'] === undefined) { mortSelectedPatientNumbers['30day_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['30day_Mort'] += d.value; }
+				}
+			});
+
+			var selectedDataset = [];
+
+			selectedDataset.push({'key':'Survived', 'value':mortSelectedPatientNumbers['Survived']});
+			selectedDataset.push({'key':'ICU_Mort', 'value':mortSelectedPatientNumbers['ICU_Mort']});
+			selectedDataset.push({'key':'Hospital_Mort', 'value':mortSelectedPatientNumbers['Hospital_Mort']});
+			selectedDataset.push({'key':'30day_Mort', 'value':mortSelectedPatientNumbers['30day_Mort']});
+
+			selectedDataset
+				.sort(mortOrderFunction);*/
+
+			mortChart.select(".bg").selectAll("rect")
+				.attr("class", function(d) {
+					if (mortSelected[d3.select(this).attr("id")] === undefined) {
+						mortSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return mortSelected[d3.select(this).attr("id")];
+				})
+
+			mortChart.select(".fg").selectAll("rect")
+				.data(selectedDataset)
+				.transition()
+				.duration(1000)
+				.attr("class", function(d) {
+					if (mortSelected[d3.select(this).attr("id")] === undefined) {
+						mortSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return mortSelected[d3.select(this).attr("id")];
+				})
+				.attr("y", function(d) { return mortScales.yScale(d.value); })
+				.attr("height", function(d) { return topChartInnerHeight - mortScales.yScale(d.value); })
+		}
+
+		function updateDiagnosisList() {
+			var selectedDataset = getDiagnosisDataset();
+
+			diagnosisList.selectAll("tr")
+				.remove();
+
+			buildDiagnosisList(selectedDataset);
+		}
+		
+		function updateOasisChart() {
+			var dataset = d3.nest()
+				.key(oasisKeyFunction)
+				.rollup(function(r) { return 0; })
+				.entries(patients);
+
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key) });
+			
+			if (dataset[dataset.length-1].key === "null") { dataset = dataset.slice(0,dataset.length-1); }
+
+			dataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+			});
+
+			var selectedPatients = oasisDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(oasisKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients);
+
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+
+			console.log(selectedDataset);
+
+			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+			});
+
+			dataset.forEach(function(dict) {
+				var keyFound = false;
+				selectedDataset.forEach(function(selectedDict) {
+					if (dict.key === selectedDict.key) { keyFound = true; }
+				});
+				if (!keyFound) { selectedDataset.push(dict); }
+			});
+
+			selectedDataset.forEach(function(d) {
+				oasisSelectedPatientNumbers[d.key] = d.value;
+			});
+
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key) });
+
+			oasisChart.select(".bg").selectAll("rect")
+				.attr("class", function(d) {
+					if (oasisSelected[d3.select(this).attr("id")] === undefined) {
+						oasisSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return oasisSelected[d3.select(this).attr("id")];
+				});
+
+			oasisChart.select(".fg").selectAll("rect")
+				.data(selectedDataset)
+				.transition()
+				.duration(1000)
+				.attr("class", function(d) {
+					if (oasisSelected[d3.select(this).attr("id")] === undefined) {
+						oasisSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return oasisSelected[d3.select(this).attr("id")];
+				})
+				.attr("y", function(d) { return oasisScales.yScale(d.value); })
+				.attr("height", function(d) { return bottomChartInnerHeight - oasisScales.yScale(d.value); });
+		}
+		
+		function updateTdeathChart() {
+			var selectedPatients = tdeathDim.top(Infinity);
+			
+			var selectedDataset = d3.nest()
+				.key(tdeathKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+			
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+			
+			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
+			
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.yvalue = d.values;
+				d.xvalue = parseFloat(d.key);
+
+				tdeathSelectedPatientNumbers[d.key] = d.yvalue;
+			});
+
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.xvalue, b.xvalue) });
+			
+			selectedDataset.forEach(function(d, i) {
+				// d for data, i for index
+
+				if (i == 0) { d.cumsum = d.yvalue; }
+				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
+
+				d.cumpercentage = (d.cumsum/selectedPatients.length);
+			});
+
+			tdeathChart.select("g.fg").selectAll("circle")
+				.remove();
+
+			tdeathChart.select("g.fg").selectAll("circle")
+				.data(selectedDataset)
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
+		}
+
+		// UPDATE EVERYTHING
+		function updateData() {
+			updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
+			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
+			//updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
+			updateMortChart();
+
+			updateDiagnosisList();
+
+			updateOasisChart();
+			updateTdeathChart();
+		}
+
+		// RENDER CHART FUNCTIONS
+		function renderTopChart(chart, dimension, keyFunction, orderFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
+			var dataset = d3.nest()
+				.key(keyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				patientNumbersDict[d.key] = d.value;
+			});
+
+			dataset
+				.sort(orderFunction);
+
+			var selectedPatients = dimension.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(keyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				selectedPatientNumbersDict[d.key] = d.value;
+			});
+
+			selectedDataset
+				.sort(orderFunction);
+
+			chart
+				.attr("width", topChartWidth)
+				.attr("height", topChartHeight);
+
+			var xAxisGroup = chart.append("g")
+				.attr("class", "xaxis")
+				.attr("transform","translate("+chartMargin.left+","+(topChartInnerHeight+chartMargin.top)+")");
+
+			var yAxisGroup = chart.append("g")
+				.attr("class", "yaxis")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var backgroundDataPointGroup = chart.append("g")
+				.attr("class", "bg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var foregroundDataPointGroup = chart.append("g")
+				.attr("class", "fg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			scalesDict.xScale = d3.scale.ordinal()
+				.rangeRoundBands([0, topChartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.key; }));
+
+			scalesDict.yScale = d3.scale.linear()
+				.range([topChartInnerHeight, 0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			backgroundDataPointGroup.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return idString+d.key; })
+					.attr("class", function(d) {
+						if (selectedDict[d3.select(this).attr("id")] === undefined) {
+							selectedDict[d3.select(this).attr("id")] = "unselected";
+						}
+						return selectedDict[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return scalesDict.xScale(d.key); })
+					.attr("y", function(d) { return scalesDict.yScale(d.value); })
+					.attr("width", scalesDict.xScale.rangeBand())
+					.attr("height", function(d) { return topChartInnerHeight - scalesDict.yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#"+idString+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(selectedPatientNumbersDict[d.key]+"/"+patientNumbersDict[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#"+idString+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							selectedDict[d3.select(this).attr("id")] = "selected";
+							
+							var filter = filterStringFunction(d.key);
+
+							filterStringsDict[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							selectedDict[d3.select(this).attr("id")] = "unselected";
+
+							filterStringsDict[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in filterStringsDict) {
+							var value = filterStringsDict[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						dimension.filter(filterFunction);
+						updateData();
+					});
+
+			foregroundDataPointGroup.selectAll("rect")
+				.data(selectedDataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return idString+d.key; })
+					.attr("class", function(d) {
+						if (selectedDict[d3.select(this).attr("id")] === undefined) {
+							selectedDict[d3.select(this).attr("id")] = "unselected";
+						}
+						return selectedDict[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return scalesDict.xScale(d.key); })
+					.attr("y", function(d) { return scalesDict.yScale(d.value); })
+					.attr("width", scalesDict.xScale.rangeBand())
+					.attr("height", function(d) { return topChartInnerHeight - scalesDict.yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#"+idString+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(selectedPatientNumbersDict[d.key]+"/"+patientNumbersDict[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#"+idString+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							selectedDict[d3.select(this).attr("id")] = "selected";
+
+							var filter = filterStringFunction(d.key);
+
+							filterStringsDict[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							selectedDict[d3.select(this).attr("id")] = "unselected";
+
+							filterStringsDict[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in filterStringsDict) {
+							var value = filterStringsDict[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						dimension.filter(filterFunction);
+						updateData();
+					});
+
+			var xAxis = d3.svg.axis()
+				.scale(scalesDict.xScale)
+				.tickSize(-topChartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(scalesDict.yScale)
+				.tickSize(-topChartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderMortChart() {
+			var dataset = d3.nest()
+				.key(mortKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+
+			dataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				mortPatientNumbers[d.key] = d.value;
+			});
+
+			dataset
+				.sort(mortOrderFunction);
+
+			var selectedPatients = mortDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(mortKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				mortSelectedPatientNumbers[d.key] = d.value;
+			});
+
+			selectedDataset
+				.sort(mortOrderFunction);
+
+			/*var tempDataset = d3.nest()
+				//.key(function (d) { return d.mortArray; })
+				.key(function (d) { return d.mortString; })
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+
+			tempDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				if (d.key.indexOf('S') != -1) {
+					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
+					else { mortPatientNumbers['Survived'] += d.value; }
+				}
+				
+				if (d.key.indexOf('I') != -1) {
+					if (mortPatientNumbers['ICU_Mort'] === undefined) { mortPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortPatientNumbers['ICU_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('H') != -1) {
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('3') != -1) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+				}
+			});
+
+			var dataset = [];
+
+			dataset.push({'key':'Survived', 'value':mortPatientNumbers['Survived']});
+			dataset.push({'key':'ICU_Mort', 'value':mortPatientNumbers['ICU_Mort']});
+			dataset.push({'key':'Hospital_Mort', 'value':mortPatientNumbers['Hospital_Mort']});
+			dataset.push({'key':'30day_Mort', 'value':mortPatientNumbers['30day_Mort']});
+
+			dataset
+				.sort(mortOrderFunction);
+
+			console.log(dataset);*/
+
+			/*var selectedPatients = mortDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(function (d) { return d.mortString; })
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				if (d.key.indexOf('S') != -1) {
+					if (mortSelectedPatientNumbers['Survived'] === undefined) { mortSelectedPatientNumbers['Survived'] = d.value; }
+					else { mortSelectedPatientNumbers['Survived'] += d.value; }
+				}
+				
+				if (d.key.indexOf('I') != -1) {
+					if (mortSelectedPatientNumbers['ICU_Mort'] === undefined) { mortSelectedPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['ICU_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('H') != -1) {
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('3') != -1) {
+					if (mortSelectedPatientNumbers['30day_Mort'] === undefined) { mortSelectedPatientNumbers['30day_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['30day_Mort'] += d.value; }
+				}
+			});
+
+			var selectedDataset = [];
+
+			selectedDataset.push({'key':'Survived', 'value':mortSelectedPatientNumbers['Survived']});
+			selectedDataset.push({'key':'ICU_Mort', 'value':mortSelectedPatientNumbers['ICU_Mort']});
+			selectedDataset.push({'key':'Hospital_Mort', 'value':mortSelectedPatientNumbers['Hospital_Mort']});
+			selectedDataset.push({'key':'30day_Mort', 'value':mortSelectedPatientNumbers['30day_Mort']});
+
+			selectedDataset
+				.sort(mortOrderFunction);*/
+
+			/*patientGroups.forEach(function (d) {
+				if (d.key.indexOf('Survived') != -1) {
+					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
+					else { mortPatientNumbers['Survived'] += d.value; }
+				}
+				
+				if (d.key.indexOf('ICU_Mort') != -1) {
+					if (mortPatientNumbers['ICU_Mort'] === undefined) { mortPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortPatientNumbers['ICU_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('Hospital_Mort') != -1) {
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+
+				if (d.key.indexOf('30day_Mort') != -1) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+				}
+			})*/
+
+			/*var dataset = [];
+
+			dataset.push({'key':'Survived', 'value':mortPatientNumbers['Survived']});
+			dataset.push({'key':'ICU_Mort', 'value':mortPatientNumbers['ICU_Mort']});
+			dataset.push({'key':'Hospital_Mort', 'value':mortPatientNumbers['Hospital_Mort']});
+			dataset.push({'key':'30day_Mort', 'value':mortPatientNumbers['30day_Mort']});*/
+
+			/*mortDimSurvived.filter(function (d) { return d==0; });
+
+			//var mortDimSurvived = mortDim.group(function (d) { return d==0; });
+			//console.log(mortDimSurvived.size());
+
+			console.log(mortDimSurvived.top(Infinity));
+
+			mortDimICUMort.filterAll();
+
+			console.log(mortDimICUMort.top(Infinity));
+			console.log(mortDimSurvived.top(Infinity));
+
+			mortDimICUMort.filter(function (d) { return d==4 || d==5; });
+
+			console.log(mortDimICUMort.top(Infinity));
+			console.log(mortDimSurvived.top(Infinity));
+
+			var dataSurvived = mortDimSurvived.top(Infinity);
+			mortPatientNumbers['Survived'] = dataSurvived.length;
+			dataset.push({'key':'Survived', 'value':dataSurvived.length});
+
+			var dataICUMort = mortDimICUMort.top(Infinity);
+			mortPatientNumbers['ICU_Mort'] = dataICUMort.length;
+			dataset.push({'key':'ICU_Mort', 'value':dataICUMort.length});
+
+			var dataHospMort = mortDimHospMort.top(Infinity);
+			mortPatientNumbers['Hospital_Mort'] = dataHospMort.length;
+			dataset.push({'key':'Hospital_Mort', 'value':dataHospMort.length});
+
+			var data30dayMort = mortDim30dayMort.top(Infinity);
+			mortPatientNumbers['30day_Mort'] = data30dayMort.length;
+			dataset.push({'key':'30day_Mort', 'value':data30dayMort.length});*/
+
+			/*var tempDataset = d3.nest()
+				.key(mortKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+
+			tempDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				if (d.key == 0) {
+					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
+					else { mortPatientNumbers['Survived'] += d.value; }
+				}
+				else if (d.key == 1) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+				}
+				else if (d.key == 2) {
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+				else if (d.key == 3) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+				else if (d.key == 4) {
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+
+					if (mortPatientNumbers['ICU_Mort'] === undefined) { mortPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortPatientNumbers['ICU_Mort'] += d.value;}
+				}
+				else if (d.key == 5) {
+					if (mortPatientNumbers['30day_Mort'] === undefined) { mortPatientNumbers['30day_Mort'] = d.value; }
+					else { mortPatientNumbers['30day_Mort'] += d.value; }
+
+					if (mortPatientNumbers['Hospital_Mort'] === undefined) { mortPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortPatientNumbers['Hospital_Mort'] += d.value; }
+
+					if (mortPatientNumbers['ICU_Mort'] === undefined) { mortPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortPatientNumbers['ICU_Mort'] += d.value; }
+				}
+			});
+
+			var dataset = [];
+
+			for (key in mortPatientNumbers) {
+				dataset.push({'key':key, 'value':mortPatientNumbers[key]});
+			}
+
+			dataset
+				.sort(mortOrderFunction);
+
+			var selectedPatients = mortDim.top(Infinity);
+
+			var tempSelectedDataset = d3.nest()
+				.key(mortKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			tempSelectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				if (d.key == 0) {
+					if (mortSelectedPatientNumbers['Survived'] === undefined) { mortSelectedPatientNumbers['Survived'] = d.value; }
+					else { mortSelectedPatientNumbers['Survived'] += d.value; }
+				}
+				else if (d.key == 1) {
+					if (mortSelectedPatientNumbers['30day_Mort'] === undefined) { mortSelectedPatientNumbers['30day_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['30day_Mort'] += d.value; }
+				}
+				else if (d.key == 2) {
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+				else if (d.key == 3) {
+					if (mortSelectedPatientNumbers['30day_Mort'] === undefined) { mortSelectedPatientNumbers['30day_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['30day_Mort'] += d.value; }
+
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+				}
+				else if (d.key == 4) {
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+
+					if (mortSelectedPatientNumbers['ICU_Mort'] === undefined) { mortSelectedPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['ICU_Mort'] += d.value;}
+				}
+				else if (d.key == 5) {
+					if (mortSelectedPatientNumbers['30day_Mort'] === undefined) { mortSelectedPatientNumbers['30day_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['30day_Mort'] += d.value; }
+
+					if (mortSelectedPatientNumbers['Hospital_Mort'] === undefined) { mortSelectedPatientNumbers['Hospital_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['Hospital_Mort'] += d.value; }
+
+					if (mortSelectedPatientNumbers['ICU_Mort'] === undefined) { mortSelectedPatientNumbers['ICU_Mort'] = d.value; }
+					else { mortSelectedPatientNumbers['ICU_Mort'] += d.value; }
+				}
+			});
+
+			var selectedDataset = [];
+
+			for (key in mortSelectedPatientNumbers) {
+				selectedDataset.push({'key':key, 'value':mortSelectedPatientNumbers[key]});
+			}
+
+			selectedDataset
+				.sort(mortOrderFunction);*/
+
+			mortChart
+				.attr("width", topChartWidth)
+				.attr("height", topChartHeight);
+
+			var xAxisGroup = mortChart.append("g")
+				.attr("class", "xaxis")
+				.attr("transform","translate("+chartMargin.left+","+(topChartInnerHeight+chartMargin.top)+")");
+
+			var yAxisGroup = mortChart.append("g")
+				.attr("class", "yaxis")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var backgroundDataPointGroup = mortChart.append("g")
+				.attr("class", "bg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var foregroundDataPointGroup = mortChart.append("g")
+				.attr("class", "fg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			mortScales.xScale = d3.scale.ordinal()
+				.rangeRoundBands([0, topChartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.key; }));
+
+			mortScales.yScale = d3.scale.linear()
+				.range([topChartInnerHeight, 0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			backgroundDataPointGroup.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "mort"+d.key; })
+					.attr("class", function(d) {
+						if (mortSelected[d3.select(this).attr("id")] === undefined) {
+							mortSelected[d3.select(this).attr("id")] = "unselected";
+						}
+						return mortSelected[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return mortScales.xScale(d.key); })
+					.attr("y", function(d) { return mortScales.yScale(d.value); })
+					.attr("width", mortScales.xScale.rangeBand())
+					.attr("height", function(d) { return topChartInnerHeight - mortScales.yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#mort"+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(mortSelectedPatientNumbers[d.key]+"/"+mortPatientNumbers[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#mort"+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							mortSelected[d3.select(this).attr("id")] = "selected";
+							
+							var filter = mortFilterStringFunction(d.key);
+
+							mortFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							mortSelected[d3.select(this).attr("id")] = "unselected";
+
+							mortFilterStrings[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in mortFilterStrings) {
+							var value = mortFilterStrings[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						mortDim.filter(filterFunction);
+						updateData();
+					});
+
+			foregroundDataPointGroup.selectAll("rect")
+				.data(selectedDataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "mort"+d.key; })
+					.attr("class", function(d) {
+						if (mortSelected[d3.select(this).attr("id")] === undefined) {
+							mortSelected[d3.select(this).attr("id")] = "unselected";
+						}
+						return mortSelected[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return mortScales.xScale(d.key); })
+					.attr("y", function(d) { return mortScales.yScale(d.value); })
+					.attr("width", mortScales.xScale.rangeBand())
+					.attr("height", function(d) { return topChartInnerHeight - mortScales.yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#mort"+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(mortSelectedPatientNumbers[d.key]+"/"+mortPatientNumbers[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#mort"+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							mortSelected[d3.select(this).attr("id")] = "selected";
+
+							var filter = mortFilterStringFunction(d.key);
+
+							mortFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							mortSelected[d3.select(this).attr("id")] = "unselected";
+
+							mortFilterStrings[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in mortFilterStrings) {
+							var value = mortFilterStrings[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						mortDim.filter(filterFunction);
+						updateData();
+					});
+
+			var xAxis = d3.svg.axis()
+				.scale(mortScales.xScale)
+				.tickSize(-topChartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(mortScales.yScale)
+				.tickSize(-topChartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+
+		function renderDiagnosisList() {
+			var selectedDataset = getDiagnosisDataset();
+
+			buildDiagnosisList(selectedDataset);
+		}
+
+		function renderOasisChart() {
+			// Organize the initital dataset
+			var dataset = d3.nest()
+				.key(oasisKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key) });
+			
+			if (dataset[dataset.length-1].key === "null") { dataset = dataset.slice(0,dataset.length-1); }
+
+			dataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				oasisPatientNumbers[d.key] = d.value;
+			});
+
+			// Now repeat for selected patients
+			var selectedPatients = oasisDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(oasisKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+			
+			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
+
+			selectedDataset.forEach(function(d) {
+				//d.age = d.key;
+				d.value = d.values;
+
+				oasisSelectedPatientNumbers[d.key] = d.value;
+			});
+
+			// Define the chart
+			oasisChart
+				.attr("width", bottomChartWidth)
+				.attr("height", bottomChartHeight);
+
+			var xAxisGroup = oasisChart.append("g")
+				.attr("class", "xaxis")
+				.attr("transform","translate("+chartMargin.left+","+(bottomChartInnerHeight+chartMargin.top)+")");
+
+			var yAxisGroup = oasisChart.append("g")
+				.attr("class", "yaxis")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var backgroundDataPointGroup = oasisChart.append("g")
+				.attr("class", "bg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var foregroundDataPointGroup = oasisChart.append("g")
+				.attr("class", "fg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+			
+			//Define the x and yScales
+			// x Domain is the ordinal d.key
+			oasisScales.xScale = d3.scale.ordinal()
+				.rangeRoundBands([0, bottomChartInnerWidth], .1)
+				.domain(dataset.map(function(d) { return d.key; }));
+			
+			// y Domain is the d.value
+			oasisScales.yScale = d3.scale.linear()
+				.range([bottomChartInnerHeight, 0])
+				.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+			// Plot the background bars
+			backgroundDataPointGroup.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "oasis"+d.key; })
+					.attr("class", function(d) {
+						if (oasisSelected[d3.select(this).attr("id")] === undefined) {
+							oasisSelected[d3.select(this).attr("id")] = "unselected";
+						}
+						return oasisSelected[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return oasisScales.xScale(d.key); })
+					.attr("y", function(d) { return oasisScales.yScale(d.value); })
+					.attr("width", oasisScales.xScale.rangeBand())
+					.attr("height", function(d) { return bottomChartInnerHeight - oasisScales.yScale(d.value); })
+					// Adding interactions for highlighting on mouseover and selection on click
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#oasis"+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(oasisSelectedPatientNumbers[d.key]+"/"+oasisPatientNumbers[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#oasis"+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							oasisSelected[d3.select(this).attr("id")] = "selected";
+							
+							var filter = oasisFilterStringFunction(d.key);
+							//console.log(filter)
+							
+							oasisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							oasisSelected[d3.select(this).attr("id")] = "unselected";
+
+							oasisFilterStrings[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in oasisFilterStrings) {
+							var value = oasisFilterStrings[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						oasisDim.filter(filterFunction);
+						updateData();
+					});
+
+			foregroundDataPointGroup.selectAll("rect")
+				.data(selectedDataset)
+				.enter()
+				.append("rect")
+					.attr("id", function(d) { return "oasis"+d.key; })
+					.attr("class", function(d) {
+						if (oasisSelected[d3.select(this).attr("id")] === undefined) {
+							oasisSelected[d3.select(this).attr("id")] = "unselected";
+						}
+						return oasisSelected[d3.select(this).attr("id")];
+					})
+					.attr("x", function(d) { return oasisScales.xScale(d.key); })
+					.attr("y", function(d) { return oasisScales.yScale(d.value); })
+					.attr("width", oasisScales.xScale.rangeBand())
+					.attr("height", function(d) { return bottomChartInnerHeight - oasisScales.yScale(d.value); })
+					.on("mouseenter", function(d,i) {
+						d3.selectAll("#oasis"+d.key)
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(oasisSelectedPatientNumbers[d.key]+"/"+oasisPatientNumbers[d.key]);
+					})
+					.on("mouseleave", function(d,i) {
+						d3.selectAll("#oasis"+d.key)
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});
+					})
+					.on("click", function(d,i) {
+						if (d3.select(this).attr("class") == "unselected") {
+							d3.select(this).attr("class", "selected");
+							oasisSelected[d3.select(this).attr("id")] = "selected";
+
+							var filter = oasisFilterStringFunction(d.key);
+
+							oasisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+						}
+						else {
+							d3.select(this).attr("class", "unselected");
+							oasisSelected[d3.select(this).attr("id")] = "unselected";
+
+							oasisFilterStrings[d3.select(this).attr("id")] = "";
+						}
+
+						// ugly ugly hack
+						var filterString = "";
+						for (var key in oasisFilterStrings) {
+							var value = oasisFilterStrings[key];
+							filterString += value;
+						}
+						var filterFunction = null;
+						if (filterString !== "") {
+							filterFunction = new Function("d", "var f = null;"+filterString+"return f;");
+						}
+						oasisDim.filter(filterFunction);
+						updateData();
+					});
+			
+			// Can we add labels to these axes? Something like "Count" for y and for the admission type plot the actual admission type string for the x axis.
+			var xAxis = d3.svg.axis()
+				.scale(oasisScales.xScale)
+				.tickSize(-bottomChartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(oasisScales.yScale)
+				.tickSize(-bottomChartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+		
+		function renderTdeathChart() {
+			// Organize the initital dataset
+			// Roll up by unique keyFunction (Tdeath in this case encoded as key) and count the occurances (value)
+			var dataset = d3.nest()
+				.key(tdeathKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(patients)
+			
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+			
+			if (dataset[dataset.length-1].key === "null") { dataset = dataset.slice(0,dataset.length-1); }
+
+			// add value = values
+			dataset.forEach(function(d, i) {
+				//d.age = d.key;
+				d.yvalue = d.values ;
+				d.xvalue = parseFloat(d.key);
+
+				tdeathPatientNumbers[d.key] = d.yvalue;
+			});
+			
+			dataset
+				.sort(function(a,b) { return d3.ascending(a.xvalue, b.xvalue) });
+						
+			dataset.forEach(function(d, i) {
+				// d for data, i for index
+
+				if (i == 0) { d.cumsum = d.yvalue; }
+				else {d.cumsum = dataset[i-1].cumsum + d.yvalue; }
+
+				d.cumpercentage = (d.cumsum/patients.length)
+			});
+			
+			// Now repeat for selected patients
+			var selectedPatients = tdeathDim.top(Infinity);
+
+			var selectedDataset = d3.nest()
+				.key(tdeathKeyFunction)
+				.rollup(function(r) { return r.length; })
+				.entries(selectedPatients)
+			
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
+			
+			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
+
+			selectedDataset.forEach(function(d, i) {
+				//d.age = d.key;
+				d.yvalue = d.values ;
+				d.xvalue = parseFloat(d.key);
+
+				tdeathSelectedPatientNumbers[d.key] = d.yvalue;
+			});
+			
+			selectedDataset
+				.sort(function(a,b) { return d3.ascending(a.xvalue, b.xvalue) });
+						
+			selectedDataset.forEach(function(d, i) {
+				// d for data, i for index
+
+				if (i == 0) { d.cumsum = d.yvalue; }
+				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
+
+				d.cumpercentage = (d.cumsum/selectedPatients.length);
+			});
+
+			// Define the chart
+			tdeathChart
+				.attr("width", bottomChartWidth)
+				.attr("height", bottomChartHeight);
+
+			var xAxisGroup = tdeathChart.append("g")
+				.attr("class", "xaxis")
+				.attr("transform","translate("+chartMargin.left+","+(bottomChartInnerHeight+chartMargin.top)+")");
+
+			var yAxisGroup = tdeathChart.append("g")
+				.attr("class", "yaxis")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var backgroundDataPointGroup = tdeathChart.append("g")
+				.attr("class", "bg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			var foregroundDataPointGroup = tdeathChart.append("g")
+				.attr("class", "fg")
+				.attr("transform","translate("+chartMargin.left+","+chartMargin.top+")");
+
+			//Define the x and yScales
+			// x Domain is the ordinal d.key
+			tdeathScales.xScale = d3.scale.linear()
+				.range([0,bottomChartInnerWidth])
+				.domain([0,d3.max(dataset, function(d) { return d.xvalue; })]);
+
+			// y Domain is the d.value
+			tdeathScales.yScale = d3.scale.linear()
+				.range([0, bottomChartInnerHeight])
+				.domain([0, 1]);
+			
+			// Plot the background circles
+			backgroundDataPointGroup.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
+			
+			// Plot the foreground circles
+			foregroundDataPointGroup.selectAll("circle")
+				.data(selectedDataset)
+				.enter()
+				.append("circle")
+				.attr("r", 2)
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
+			
+			// Can we add labels to these axes? Something like "Count" for y and for the admission type plot the actual admission type string for the x axis.
+			var xAxis = d3.svg.axis()
+				.scale(tdeathScales.xScale)
+				.tickSize(-bottomChartInnerHeight)
+				.orient("bottom");
+			xAxisGroup.call(xAxis);
+
+			var yAxis = d3.svg.axis()
+				.scale(tdeathScales.yScale)
+				.tickSize(-bottomChartInnerWidth)
+				.orient("left");
+			yAxisGroup.call(yAxis);
+		}
+		
+		// RENDER EVERYTHING
+		function render() {
+			renderTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissPatientNumbers, admissSelectedPatientNumbers, admissScales, "admiss", admissSelected, admissFilterStrings, admissFilterStringFunction);
+			renderTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, agePatientNumbers, ageSelectedPatientNumbers, ageScales, "age", ageSelected, ageFilterStrings, ageFilterStringFunction);
+			renderTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexPatientNumbers, sexSelectedPatientNumbers, sexScales, "sex", sexSelected, sexFilterStrings, sexFilterStringFunction);
+			//renderTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortPatientNumbers, mortSelectedPatientNumbers, mortScales, "mort", mortSelected, mortFilterStrings, mortFilterStringFunction);
+			renderMortChart();
+			
+			renderDiagnosisList();
+
+			renderOasisChart();
+			renderTdeathChart();
+		}
+
+		// INITIALIZE
+		function init() {
+			cf = crossfilter(patients);
+
+			admissDim = cf.dimension(function (d) { return d.admiss; });
+			ageDim = cf.dimension(function (d) { return d.age; });
+			sexDim = cf.dimension(function (d) { return d.sex; });
+			mortDim = cf.dimension(function (d) { return d.mort; });
+			//mortDim = cf.dimension(function (d) { return d.mortString; });
+			//mortDim = cf.dimension(function (d) { return d.mortArray });
+			/*mortDim = cf.dimension(function (d) {
+				var mortArray = [];
+				if (d.mort == 0) { mortArray.push('Survived'); }
+				if (d.mort == 5 || d.mort == 4 ) { mortArray.push('ICU_Mort'); }
+				if (d.mort == 5 || d.mort == 4 || d.mort == 3 || d.mort == 2) { mortArray.push('Hospital_Mort'); }
+				if (d.mort == 1 || d.mort == 3 || d.mort == 5) { mortArray.push('30day_Mort'); }
+				return JSON.stringify(mortArray);
+			});*/
+			//mortDimSurvived = cf.dimension(function (d) { return d.mort; })/*.filter(function (d) { return d==0; })*/;
+			//mortDimICUMort = cf.dimension(function (d) { return d.mort; })/*.filter(function (d) { return d==4 || d==5; })*/;
+			//mortDimHospMort = cf.dimension(function (d) { return d.mort; })/*.filter(function (d) { return d==2 || d==3 || d==4 || d==5; })*/;
+			//mortDim30dayMort = cf.dimension(function (d) { return d.mort; })/*.filter(function (d) { return d==1 || d==3 || d==5; })*/;
+			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
+			oasisDim = cf.dimension(function (d) { return d.OASIS; });
+			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
+		}
+
+		// READ IN EXTERNAL FILES
+		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/icd9_2.json", function(error, data) {
+			icd9 = data;
+		});
+
+		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_4.json", function(error, data) {
+			/*data.forEach(function (d) {
+				var mortString = "";
+				//var mortArray = [];
+				if (d.mort == 0) {
+					mortString += 'S';
+					//mortArray.push('Survived');
+				}
+				if (d.mort == 5 || d.mort == 4 ) {
+					mortString += 'I';
+					//mortArray.push('ICU_Mort');
+				}
+				if (d.mort == 5 || d.mort == 4 || d.mort == 3 || d.mort == 2) {
+					mortString += 'H';
+					//mortArray.push('Hospital_Mort');
+				}
+				if (d.mort == 1 || d.mort == 3 || d.mort == 5) {
+					mortString += '3';
+					//mortArray.push('30day_Mort');
+				}
+				d.mortString = mortString;
+				//d.mortArray = JSON.stringify(mortArray);
+			})*/
+
+			patients = data;
+			init();
+			render();
+		});
+	</script>
+</html>

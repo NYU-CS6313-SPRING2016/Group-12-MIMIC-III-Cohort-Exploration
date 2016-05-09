@@ -560,26 +560,6 @@
 						var value = diagnosisFilterStrings[key];
 						filterString += value;
 					}
-<<<<<<< HEAD
-
-					var filterFunction = null;
-					if (filterString !== "") {
-						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
-					}
-					diagnosisDim.filter(filterFunction);
-					updateData();
-				});
-			tr
-				.append("td")
-				.attr("class", "icd9")
-				.text(function(d) { return d.key; })
-			tr
-				.append("td")
-				.attr("class", "shortdesc")
-				.text(function(d) { return d.short; })
-		}
-
-=======
 
 					var filterFunction = null;
 					if (filterString !== "") {
@@ -629,8 +609,6 @@
 	            return Math.max(a,b,c,d);
 	            
 	        }
-
->>>>>>> origin/master
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
 			var dataset = d3.nest()
@@ -811,7 +789,7 @@
 			selectedDataset
 				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
 
-			console.log(selectedDataset);
+			//console.log(selectedDataset);
 
 			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
 
@@ -855,7 +833,6 @@
 				})
 				.attr("y", function(d) { return oasisScales.yScale(d.value); })
 				.attr("height", function(d) { return bottomChartInnerHeight - oasisScales.yScale(d.value); });
-<<<<<<< HEAD
 		}
 		
 		function updateTdeathChart() {
@@ -901,8 +878,6 @@
 				.attr("r", 2)
 				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
-=======
->>>>>>> origin/master
 		}
 		
 		function updateTdeathChart() {
@@ -938,8 +913,6 @@
 				d.cumpercentage = (d.cumsum/selectedPatients.length);
 			});
 
-<<<<<<< HEAD
-=======
 			tdeathChart.select("g.fg").selectAll("circle")
 				.remove();
 
@@ -968,7 +941,6 @@
 	            parent = adult;
 	        }
 
->>>>>>> origin/master
 		// UPDATE EVERYTHING
 		function updateData() {
 			updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
@@ -981,11 +953,6 @@
 
 			updateOasisChart();
 			updateTdeathChart();
-<<<<<<< HEAD
-		}
-
-		// RENDER CHART FUNCTIONS
-=======
 			updateFlowChart();
 		}
 
@@ -1149,7 +1116,7 @@
                 update();
             }
         
->>>>>>> origin/master
+
 		function renderTopChart(chart, dimension, keyFunction, orderFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
 			var dataset = d3.nest()
 				.key(keyFunction)
@@ -1394,7 +1361,6 @@
 			tempDataset.forEach(function(d) {
 				//d.age = d.key;
 				d.value = d.values;
-<<<<<<< HEAD
 
 				if (d.key.indexOf('S') != -1) {
 					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
@@ -1417,7 +1383,6 @@
 				}
 			});
 
-=======
 
 				if (d.key.indexOf('S') != -1) {
 					if (mortPatientNumbers['Survived'] === undefined) { mortPatientNumbers['Survived'] = d.value; }
@@ -1440,7 +1405,6 @@
 				}
 			});
 
->>>>>>> origin/master
 			var dataset = [];
 
 			dataset.push({'key':'Survived', 'value':mortPatientNumbers['Survived']});
@@ -2232,14 +2196,10 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-<<<<<<< HEAD
-=======
             		parent = String(patients.length);
             		nodeNum = patients.length;
             		graph = new renderFilterGraph("#flowchart");
             		graph.addNode(parent);
-            		
->>>>>>> origin/master
 		}
 
 		// READ IN EXTERNAL FILES

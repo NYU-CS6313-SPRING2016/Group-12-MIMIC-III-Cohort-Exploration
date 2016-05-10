@@ -45,19 +45,19 @@
 			/*CHART TITLE*/
 
 			.chart-title {
-  				border-bottom: 1px solid #d7d7d7;
-  				color: #666;
-  				font-size: 12px;
-  				font-weight: 200;
-  				padding: 7px 10px 4px;
+				border-bottom: 1px solid #d7d7d7;
+				color: #666;
+				font-size: 12px;
+				font-weight: 200;
+				padding: 7px 10px 4px;
 			}
 
 			.chart-title-search {
-  				border-bottom: 1px solid #d7d7d7;
-  				color: #666;
-  				font-size: 12px;
-  				font-weight: 200;
-  				padding: 7px 10px 4px;
+				border-bottom: 1px solid #d7d7d7;
+				color: #666;
+				font-size: 12px;
+				font-weight: 200;
+				padding: 7px 10px 4px;
 			}
 
 			strong 
@@ -142,9 +142,10 @@
 				stroke: #888;
 			}
 			#scrolldiv {
-				height: 400px;
-				position: absolute;
-				overflow-x:scroll;
+				height: 373px;
+				width: 100%;
+				/*position: absolute;*/
+				overflow-x:none;
 				overflow-y:scroll;
 			}
 			#diagnosislist {
@@ -258,11 +259,9 @@
 		</div>
 		<div id="tooltip">Toolip</div>
 	</body>
-	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
-    <script type="text/javascript"></script>
-    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-    <script language="JavaScript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
 	<script>
 		// CONSTANTS
 		var topChartWidth = 300;
@@ -286,10 +285,10 @@
 		var cf;
 		
 		var nodes = [],
-        	    links = [];
-        	
-        	var nodeNum;
-        	var parent;
+				links = [];
+			
+			var nodeNum;
+			var parent;
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -603,26 +602,26 @@
 				icd9 = data;
 			});
 			var text = document.getElementById("query").value;
-    		var query = new RegExp("(\\b" + text + "\\b)", "gim");
-    		var searchField = "full";
-    		var newDataset = [];
+			var query = new RegExp("(\\b" + text + "\\b)", "gim");
+			var searchField = "full";
+			var newDataset = [];
 
-    		for( var i = 0; i < icd9.length; i++){
-    			var el = icd9[i];
-    			//var str = JSON.stringify(el.full).toLowerCase();
-    			//console.log(text);
-    			//console.log(str);
+			for( var i = 0; i < icd9.length; i++){
+				var el = icd9[i];
+				//var str = JSON.stringify(el.full).toLowerCase();
+				//console.log(text);
+				//console.log(str);
 
 
-    			if(JSON.stringify(el).toLowerCase().includes(text)){
-    				newDataset.push(el);
-    			}
-    		}
+				if(JSON.stringify(el).toLowerCase().includes(text)){
+					newDataset.push(el);
+				}
+			}
 
-    		console.log(newDataset);
+			console.log(newDataset);
 
-    		buildModDiagnosisList(newDataset);
-    		//buildDiagnosisList(newDataset);
+			buildModDiagnosisList(newDataset);
+			//buildDiagnosisList(newDataset);
 		}
 
 		function buildModDiagnosisList(selectedDataset){
@@ -796,36 +795,36 @@
 		}
 		
 		function maxObjects(obj)
-	        {
-	            var max = undefined;
-	            for( var el in obj ) 
-	            {
-	                if( obj.hasOwnProperty( el ) ) 
-	                {
-	                    if (max == undefined){
-	                        max = obj[el]}
-	                    else if (obj[el] > max){
-	                        max = obj[el]}
-	                  //sum += parseFloat( obj[el] );
-	                }
-	            }
-	            //console.log(max)
-	          return max;
-	        }
-        
-	        function cohortPatientTotal()
-	        {
-	            /*var admissSelectedPatientNumbers = {};
-	            var ageSelectedPatientNumbers = {};
-	            var sexSelectedPatientNumbers = {};
-	            var mortSelectedPatientNumbers = {};*/
-	            var a = maxObjects(admissSelectedPatientNumbers)
-	            var b = maxObjects(ageSelectedPatientNumbers)
-	            var c = maxObjects(sexSelectedPatientNumbers)
-	            var d = maxObjects(mortSelectedPatientNumbers)
-	            return Math.max(a,b,c,d);
-	            
-	        }
+			{
+				var max = undefined;
+				for( var el in obj ) 
+				{
+					if( obj.hasOwnProperty( el ) ) 
+					{
+						if (max == undefined){
+							max = obj[el]}
+						else if (obj[el] > max){
+							max = obj[el]}
+					  //sum += parseFloat( obj[el] );
+					}
+				}
+				//console.log(max)
+			  return max;
+			}
+		
+			function cohortPatientTotal()
+			{
+				/*var admissSelectedPatientNumbers = {};
+				var ageSelectedPatientNumbers = {};
+				var sexSelectedPatientNumbers = {};
+				var mortSelectedPatientNumbers = {};*/
+				var a = maxObjects(admissSelectedPatientNumbers)
+				var b = maxObjects(ageSelectedPatientNumbers)
+				var c = maxObjects(sexSelectedPatientNumbers)
+				var d = maxObjects(mortSelectedPatientNumbers)
+				return Math.max(a,b,c,d);
+				
+			}
 
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
@@ -1145,20 +1144,20 @@
 		}
 		
 		function updateFlowChart()
-	        {
-	            // can't figure out why the link isn't showing up in the vis, shows up in sample program I made
-	            
-	            var patientTotal = cohortPatientTotal()
-	            var parNode = nodeNum
-	            nodeNum = patientTotal
-	            graph.addNode(nodeNum);
-	            graph.addLink(parent, String(nodeNum));
-	            nodeNum = parNode - nodeNum;
-	            var adult = String(nodeNum);
-	            graph.addNode(nodeNum)
-	            graph.addLink(parent, String(nodeNum))
-	            parent = adult;
-	        }
+			{
+				// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
+				
+				var patientTotal = cohortPatientTotal()
+				var parNode = nodeNum
+				nodeNum = patientTotal
+				graph.addNode(nodeNum);
+				graph.addLink(parent, String(nodeNum));
+				nodeNum = parNode - nodeNum;
+				var adult = String(nodeNum);
+				graph.addNode(nodeNum)
+				graph.addLink(parent, String(nodeNum))
+				parent = adult;
+			}
 
 		// UPDATE EVERYTHING
 		function updateData() {
@@ -1179,165 +1178,165 @@
 		}
 
 		// RENDER CHART FUNCTIONS
-        function renderFilterGraph(el) {
-                // modified from http://stackoverflow.com/questions/9539294/adding-new-nodes-to-force-directed-layout
-                // Add and remove elements on the graph object
-                this.addNode = function (id) {
-                    nodes.push({"id":id});
-                    update();
-                }
+		function renderFilterGraph(el) {
+				// modified from http://stackoverflow.com/questions/9539294/adding-new-nodes-to-force-directed-layout
+				// Add and remove elements on the graph object
+				this.addNode = function (id) {
+					nodes.push({"id":id});
+					update();
+				}
 
-                this.removeNode = function (id) {
-                    var i = 0;
-                    var n = findNode(id);
-                    while (i < links.length) {
-                        if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
-                        else i++;
-                    }
-                    var index = findNodeIndex(id);
-                    if(index !== undefined) {
-                        nodes.splice(index, 1);
-                        update();
-                    }
-                }
+				this.removeNode = function (id) {
+					var i = 0;
+					var n = findNode(id);
+					while (i < links.length) {
+						if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
+						else i++;
+					}
+					var index = findNodeIndex(id);
+					if(index !== undefined) {
+						nodes.splice(index, 1);
+						update();
+					}
+				}
 
-                this.addLink = function (sourceId, targetId) {
-                    var sourceNode = findNode(sourceId);
-                    var targetNode = findNode(targetId);
+				this.addLink = function (sourceId, targetId) {
+					var sourceNode = findNode(sourceId);
+					var targetNode = findNode(targetId);
 
-                    if((sourceNode !== undefined) && (targetNode !== undefined)) {
-                        links.push({"source": sourceNode, "target": targetNode});
-                        update();
-                    }
-                }
+					if((sourceNode !== undefined) && (targetNode !== undefined)) {
+						links.push({"source": sourceNode, "target": targetNode});
+						update();
+					}
+				}
 
-                var findNode = function (id) {
-                    for (var i=0; i < nodes.length; i++) {
-                        if (nodes[i].id === id)
-                            return nodes[i]
-                    };
-                }
+				var findNode = function (id) {
+					for (var i=0; i < nodes.length; i++) {
+						if (nodes[i].id === id)
+							return nodes[i]
+					};
+				}
 
-                var findNodeIndex = function (id) {
-                    for (var i=0; i < nodes.length; i++) {
-                        if (nodes[i].id === id)
-                            return i
-                    };
-                }
+				var findNodeIndex = function (id) {
+					for (var i=0; i < nodes.length; i++) {
+						if (nodes[i].id === id)
+							return i
+					};
+				}
 
-                // set up the D3 visualisation in the specified element
-                var w = $(el).innerWidth(),
-                    h = $(el).innerHeight();
+				// set up the D3 visualisation in the specified element
+				var w = $(el).innerWidth(),
+					h = $(el).innerHeight();
 
-                var vis = this.vis = d3.select(el).append("svg:svg")
-                    .attr("width", w)
-                    .attr("height", h);
+				var vis = this.vis = d3.select(el).append("svg:svg")
+					.attr("width", w)
+					.attr("height", h);
 
-                var force = d3.layout.force()
-                    .gravity(.05)
-                    .distance(100)
-                    .charge(-100)
-                    .size([w, h]);
+				var force = d3.layout.force()
+					.gravity(.05)
+					.distance(100)
+					.charge(-100)
+					.size([w, h]);
 
-                var nodes = force.nodes(),
-                    links = force.links();
+				var nodes = force.nodes(),
+					links = force.links();
 
-                var update = function () {
+				var update = function () {
 
-                    var link = vis.selectAll("line.link")
-                        .data(links, function(d) { return d.source.id + "-" + d.target.id; });
+					var link = vis.selectAll("line.link")
+						.data(links, function(d) { return d.source.id + "-" + d.target.id; });
 
-                    link.enter().insert("line")
-                        .attr("class", "link");
+					link.enter().insert("line")
+						.attr("class", "link");
 
-                    link.exit().remove();
+					link.exit().remove();
 
-                    var node = vis.selectAll("g.node")
-                        .data(nodes, function(d) { return d.id;});
+					var node = vis.selectAll("g.node")
+						.data(nodes, function(d) { return d.id;});
 
-                    var nodeEnter = node.enter().append("g")
-                        .attr("class", "node")
-                        .call(force.drag)
-                        .on("mouseenter", function(d,i) { 
-                            //work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
-                            var g = d3.select(this); // The node
-                            // The class is used to remove the additional text later
-                            var info = g.append('text')
-                                .classed('info', true)
-                                .attr('x', 20)
-                                .attr('y', 10)
-                                .text(function(d) {return d.id});
-                            /*d3.selectAll("#tooltip")
-                                .style("stroke", "black");
-                            d3.select("#tooltip").style({
-                                top: d3.event.clientY+5,
-                                left: d3.event.clientX+5,
-                                visibility: "visible",
-                                opacity: 1
-                            });
-                            d3.select("#tooltip").text(function(d) {return d.id});*/
-                        })
-                        .on("mouseleave", function(d,i) {
-                            // Remove the info text on mouse out.
-                            d3.select(this).select('text.info').remove();
-                            /*d3.selectAll("#tooltip")
-                                .style("stroke", undefined);
-                            d3.select("#tooltip").style({
-                                visibility: "hidden",
-                                opacity: 0
-                            });*/
-                        });
+					var nodeEnter = node.enter().append("g")
+						.attr("class", "node")
+						.call(force.drag)
+						.on("mouseenter", function(d,i) { 
+							//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
+							var g = d3.select(this); // The node
+							// The class is used to remove the additional text later
+							var info = g.append('text')
+								.classed('info', true)
+								.attr('x', 20)
+								.attr('y', 10)
+								.text(function(d) {return d.id});
+							/*d3.selectAll("#tooltip")
+								.style("stroke", "black");
+							d3.select("#tooltip").style({
+								top: d3.event.clientY+5,
+								left: d3.event.clientX+5,
+								visibility: "visible",
+								opacity: 1
+							});
+							d3.select("#tooltip").text(function(d) {return d.id});*/
+						})
+						.on("mouseleave", function(d,i) {
+							// Remove the info text on mouse out.
+							d3.select(this).select('text.info').remove();
+							/*d3.selectAll("#tooltip")
+								.style("stroke", undefined);
+							d3.select("#tooltip").style({
+								visibility: "hidden",
+								opacity: 0
+							});*/
+						});
 
-                    /*nodeEnter.append("image")
-                        .attr("class", "circle")
-                        .attr("xlink:href", "https://d3nwyuy0nl342s.cloudfront.net/images/icons/public.png")
-                        .attr("x", "-8px")
-                        .attr("y", "-8px")
-                        .attr("width", "16px")
-                        .attr("height", "16px");*/
+					/*nodeEnter.append("image")
+						.attr("class", "circle")
+						.attr("xlink:href", "https://d3nwyuy0nl342s.cloudfront.net/images/icons/public.png")
+						.attr("x", "-8px")
+						.attr("y", "-8px")
+						.attr("width", "16px")
+						.attr("height", "16px");*/
 
-                    /*nodeEnter.append("text")
-                        .attr("class", "nodetext")
-                        .attr("dx", 12)
-                        .attr("dy", ".35em")
-                        .style("opacity", 1)
-                        .style("color", "black")
-                        .text(function(d) {return d.id});*/
-                    
-                    var sizeScale = d3.scale.linear()
-	                    .range([20,1000])
-	                    .domain([0, patients.length]);
-                
-                    var patientTotal = cohortPatientTotal()
+					/*nodeEnter.append("text")
+						.attr("class", "nodetext")
+						.attr("dx", 12)
+						.attr("dy", ".35em")
+						.style("opacity", 1)
+						.style("color", "black")
+						.text(function(d) {return d.id});*/
+					
+					var sizeScale = d3.scale.linear()
+						.range([20,1000])
+						.domain([0, patients.length]);
+				
+					var patientTotal = cohortPatientTotal()
 
-                    nodeEnter.append("circle")
-                        .attr("stroke", "steelblue")
-                        .style("fill", "#fff")
-                        //.attr("r", 10);
-                        .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
-                        //.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
-                        //.attr("strokewidth", 3px);
+					nodeEnter.append("circle")
+						.attr("stroke", "steelblue")
+						.style("fill", "#fff")
+						//.attr("r", 10);
+						.attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
+						//.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
+						//.attr("strokewidth", 3px);
 
 
-                    node.exit().remove();
+					node.exit().remove();
 
-                    force.on("tick", function() {
-                      link.attr("x1", function(d) { return d.source.x; })
-                          .attr("y1", function(d) { return d.source.y; })
-                          .attr("x2", function(d) { return d.target.x; })
-                          .attr("y2", function(d) { return d.target.y; });
+					force.on("tick", function() {
+					  link.attr("x1", function(d) { return d.source.x; })
+						  .attr("y1", function(d) { return d.source.y; })
+						  .attr("x2", function(d) { return d.target.x; })
+						  .attr("y2", function(d) { return d.target.y; });
 
-                      node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-                    });
+					  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+					});
 
-                    // Restart the force layout.
-                    force.start();
-                }
+					// Restart the force layout.
+					force.start();
+				}
 
-                // Make it all go
-                update();
-            }
-        
+				// Make it all go
+				update();
+			}
+		
 		function renderTopChart(chart, dimension, keyFunction, orderFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
 			var dataset = d3.nest()
 				.key(keyFunction)
@@ -2563,11 +2562,11 @@
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
 
-            		parent = String(patients.length);
-            		nodeNum = patients.length;
-            		graph = new renderFilterGraph("#flowchart");
-            		graph.addNode(parent);
-            		
+					parent = String(patients.length);
+					nodeNum = patients.length;
+					graph = new renderFilterGraph("#flowchart");
+					graph.addNode(parent);
+					
 		}
 
 		// READ IN EXTERNAL FILES

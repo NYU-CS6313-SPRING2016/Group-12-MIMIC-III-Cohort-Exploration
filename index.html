@@ -596,9 +596,6 @@
 		}
 
 		function highlightSearch() {
-			/*d3.json("https://raw.githubusercontent.com/harshanandrews/MIMIC-III/master/icd9_3.json", function(error, data) {
-				icd9 = data;
-			});*/
 			var text = document.getElementById("query").value;
 			var query = new RegExp("(\\b" + text + "\\b)", "gim");
 			var searchField = "full";

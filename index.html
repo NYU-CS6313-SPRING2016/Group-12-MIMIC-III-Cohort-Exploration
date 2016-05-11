@@ -67,6 +67,7 @@
 			}
 
 			.vis {
+				margin: auto;
 				background-color: white;
 				width: 1224px;
 				height: 618px;
@@ -348,11 +349,11 @@
 		var mortKeyFunction = function(d) {
 			var mortDesc = null;
 			if (d.mort == 0) { mortDesc = 'Survived'; }
-			else if (d.mort == 1) { mortDesc = '30d'; }
-			else if (d.mort == 2) { mortDesc = 'Hosp'; }
-			else if (d.mort == 3) { mortDesc = '30d_Hosp'; }
-			else if (d.mort == 4) { mortDesc = 'ICU'; }
-			else if (d.mort == 5) { mortDesc = '30d_ICU'; }
+			else if (d.mort == 1) { mortDesc = '✝30d'; }
+			else if (d.mort == 2) { mortDesc = '✝Hosp'; }
+			else if (d.mort == 3) { mortDesc = '✝30d_Hosp'; }
+			else if (d.mort == 4) { mortDesc = '✝ICU'; }
+			else if (d.mort == 5) { mortDesc = '✝30d_ICU'; }
 			return mortDesc;
 		};
 		//diagnosisKeyFunction too complicated
@@ -382,7 +383,7 @@
 		var ageOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
 		var sexOrderFunction = function(a,b) { return d3.ascending(a.key, b.key); };
 		var mortOrderFunction = function(a,b) {
-			var orderArray = ['Survived','ICU','Hosp','30d_ICU', '30d_Hosp', '30d'];
+			var orderArray = ['Survived','✝ICU','✝Hosp','✝30d_ICU', '✝30d_Hosp', '✝30d'];
 			return d3.ascending(orderArray.indexOf(a.key), orderArray.indexOf(b.key));
 		};
 		var diagnosisOrderFunction = function(a,b) { return d3.descending(a.value, b.value); };
@@ -454,11 +455,11 @@
 		function mortFilterStringFunction(key) {
 			var mortCode = null;
 			if (key === 'Survived') { mortCode = 0; }
-			else if (key === '30d') { mortCode = 1; }
-			else if (key === 'Hosp') { mortCode = 2; }
-			else if (key === '30d_Hosp') { mortCode = 3; }
-			else if (key === 'ICU') { mortCode = 4; }
-			else if (key === '30d_ICU') { mortCode = 5; }
+			else if (key === '✝30d') { mortCode = 1; }
+			else if (key === '✝Hosp') { mortCode = 2; }
+			else if (key === '✝30d_Hosp') { mortCode = 3; }
+			else if (key === '✝ICU') { mortCode = 4; }
+			else if (key === '✝30d_ICU') { mortCode = 5; }
 			return "(d=="+mortCode+")";
 		};
 		function diagnosisFilterStringFunction(key) {

@@ -9,28 +9,24 @@
 
 			/*HEADER*/
 
-			#header
-			{
+			#header {
 				padding: 3em 0em;
 				height: 66px;
 				margin-top:-100px;
 			}
 
-			#header .container
-			{
+			#header .container {
 				position: relative;
 			}
 
 			/*LOGO*/
 
-			#logo
-			{
+			#logo {
 				position: relative;
 				margin-bottom: 2em;
 			}
 	
-			#logo h1
-			{
+			#logo h1 {
 				display: block;
 				letter-spacing: 1px;
 				text-decoration: none;
@@ -42,8 +38,19 @@
 				padding-top: 30px;
 			}
 
-			/*CHART TITLE*/
+			.vis {
+				margin: auto;
+				background-color: white;
+				width: 1224px;
+				height: 620px;
+			}
 
+			.chartarea {
+				display: inline;
+				float: left;
+				margin: 2px;
+				border: solid 1px gray;
+			}
 			.chart-title {
 				border-bottom: 1px solid #d7d7d7;
 				color: #666;
@@ -60,31 +67,18 @@
 				padding: 7px 10px 4px;
 			}
 
-			strong 
-			{
+			.chart-title strong  {
 				font-weight: 700;
 				color: #2A2A2A;
 			}
 
-			.vis {
-				margin: auto;
-				background-color: white;
-				width: 1224px;
-				height: 618px;
-			}
-			.chartarea {
-				display: inline;
-				float: left;
-				margin: 2px;
-				border: solid 1px gray;
-			}
 			.topchart {
 				width: 300px;
-				height: 120px;
+				height: 125px;
 			}
 			#diagnosislistchartarea {
 				width: 300px;
-				height: 456px;
+				height: 457px;
 				overflow-x:scroll;
 				overflow-y:scroll;
 			}
@@ -96,6 +90,7 @@
 				width: 453px;
 				height: 125px;
 			}
+
 			.topchart rect {
 				cursor: pointer;
 			}
@@ -111,41 +106,10 @@
 			.topchart g.fg rect.selected {
 				fill: orange;
 			}
-			#oasischart rect {
-				cursor: pointer;
-			}
-			#oasischart g.bg rect.unselected {
-				fill: lightgray;
-			}
-			#oasischart g.bg rect.selected {
-				fill: gray;
-			}
-			#oasischart g.fg rect.unselected {
-				fill: cornflowerblue;
-			}
-			#oasischart g.fg rect.selected {
-				fill: orange;
-			}
-			#tdeathchart g.bg circle {
-				fill: gray;
-			}
-			#tdeathchart g.fg circle {
-				fill: cornflowerblue;
-			}
-			.tick {
-				font-size: 7;
-			}
-			.tick line {
-				stroke: #ccc;
-			}
-			.domain {
-				fill: none;
-				stroke: #888;
-			}
+
 			#scrolldiv {
-				height: 373px;
+				height: 374px;
 				width: 100%;
-				/*position: absolute;*/
 				overflow-x:none;
 				overflow-y:scroll;
 			}
@@ -174,6 +138,47 @@
 			#diagnosislist td.icd9 {
 				width: 65px;
 			}
+
+			#oasischart rect {
+				cursor: pointer;
+			}
+			#oasischart g.bg rect.unselected {
+				fill: lightgray;
+			}
+			#oasischart g.bg rect.selected {
+				fill: gray;
+			}
+			#oasischart g.fg rect.unselected {
+				fill: cornflowerblue;
+			}
+			#oasischart g.fg rect.selected {
+				fill: orange;
+			}
+
+			#tdeathchart g.bg circle {
+				fill: gray;
+			}
+			#tdeathchart g.fg circle {
+				fill: cornflowerblue;
+			}
+
+			.axislabel {
+				text-anchor: middle;
+				font-family: sans-serif;
+				font-size: 9px;
+				font-weight: bold;
+			}
+			.tick {
+				font-size: 7;
+			}
+			.tick line {
+				stroke: #ccc;
+			}
+			.domain {
+				fill: none;
+				stroke: #888;
+			}
+
 			#tooltip {
 				position: absolute;
 				top: 0;
@@ -310,10 +315,6 @@
 		var ageDim;
 		var sexDim;
 		var mortDim;
-		//var mortDimSurvived;
-		//var mortDimICUMort;
-		//var mortDimHospMort;
-		//var mortDim30dayMort;
 		var diagnosisDim;
 		var oasisDim;
 		var tdeathDim;
@@ -586,7 +587,7 @@
 				selectedDataset.forEach(function(selectedDict) {
 					if (selectedDict.key === dict.icd9) {
 						selectedDict.short = dict.short;
-						selectedDict.long = dict.long;
+						selectedDict.full = dict.full;
 					}
 				});
 			});
@@ -595,10 +596,9 @@
 		}
 
 		function highlightSearch() {
-
-			d3.json("https://raw.githubusercontent.com/harshanandrews/MIMIC-III/master/icd9_3.json", function(error, data) {
+			/*d3.json("https://raw.githubusercontent.com/harshanandrews/MIMIC-III/master/icd9_3.json", function(error, data) {
 				icd9 = data;
-			});
+			});*/
 			var text = document.getElementById("query").value;
 			var query = new RegExp("(\\b" + text + "\\b)", "gim");
 			var searchField = "full";
@@ -683,14 +683,11 @@
 			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
 			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
 			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
-			//updateMortChart();
 
 			updateModDiagnosisList(selectedDataset);
 
 			updateOasisChart();
 			updateTdeathChart();
-
-			// RENDER CHART FUNCTIONS
 
 			updateFlowChart();
 		}
@@ -737,7 +734,7 @@
 						visibility: "visible",
 						opacity: 1
 					});
-					d3.select("#tooltip").text(d.long+" ("+ d.value+")");
+					d3.select("#tooltip").text(d.full+" ("+ d.value+")");
 					})
 				.on("mouseleave", function(d,i) {
 					d3.select(this).style({
@@ -887,6 +884,21 @@
 
 			buildDiagnosisList(selectedDataset);
 		}
+
+		function updateFlowChart() {
+			// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
+			
+			var patientTotal = cohortPatientTotal()
+			var parNode = nodeNum
+			nodeNum = patientTotal
+			graph.addNode(nodeNum);
+			graph.addLink(parent, String(nodeNum));
+			nodeNum = parNode - nodeNum;
+			var adult = String(nodeNum);
+			graph.addNode(nodeNum)
+			graph.addLink(parent, String(nodeNum))
+			parent = adult;
+		}
 		
 		function updateOasisChart() {
 			var dataset = d3.nest()
@@ -1004,67 +1016,6 @@
 				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 		}
-		
-		function updateTdeathChart() {
-			var selectedPatients = tdeathDim.top(Infinity);
-			
-			var selectedDataset = d3.nest()
-				.key(tdeathKeyFunction)
-				.rollup(function(r) { return r.length; })
-				.entries(selectedPatients)
-			
-			selectedDataset
-				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
-			
-			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
-			
-			selectedDataset.forEach(function(d) {
-				//d.age = d.key;
-				d.yvalue = d.values;
-				d.xvalue = parseFloat(d.key);
-
-				tdeathSelectedPatientNumbers[d.key] = d.yvalue;
-			});
-
-			selectedDataset
-				.sort(function(a,b) { return d3.ascending(a.xvalue, b.xvalue) });
-			
-			selectedDataset.forEach(function(d, i) {
-				// d for data, i for index
-
-				if (i == 0) { d.cumsum = d.yvalue; }
-				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
-
-				d.cumpercentage = (d.cumsum/selectedPatients.length);
-			});
-
-			tdeathChart.select("g.fg").selectAll("circle")
-				.remove();
-
-			tdeathChart.select("g.fg").selectAll("circle")
-				.data(selectedDataset)
-				.enter()
-				.append("circle")
-				.attr("r", 2)
-				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
-				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
-		}
-		
-		function updateFlowChart()
-			{
-				// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
-				
-				var patientTotal = cohortPatientTotal()
-				var parNode = nodeNum
-				nodeNum = patientTotal
-				graph.addNode(nodeNum);
-				graph.addLink(parent, String(nodeNum));
-				nodeNum = parNode - nodeNum;
-				var adult = String(nodeNum);
-				graph.addNode(nodeNum)
-				graph.addLink(parent, String(nodeNum))
-				parent = adult;
-			}
 
 		// UPDATE EVERYTHING
 		function updateData() {
@@ -1072,178 +1023,16 @@
 			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
 			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
 			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
-			//updateMortChart();
 
 			updateDiagnosisList();
 
 			updateOasisChart();
 			updateTdeathChart();
 
-			// RENDER CHART FUNCTIONS
-
 			updateFlowChart();
 		}
 
 		// RENDER CHART FUNCTIONS
-		function renderFilterGraph(el) {
-			// modified from http://stackoverflow.com/questions/9539294/adding-new-nodes-to-force-directed-layout
-			// Add and remove elements on the graph object
-			this.addNode = function (id) {
-				nodes.push({"id":id});
-				update();
-			}
-
-			this.removeNode = function (id) {
-				var i = 0;
-				var n = findNode(id);
-				while (i < links.length) {
-					if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
-					else i++;
-				}
-				var index = findNodeIndex(id);
-				if(index !== undefined) {
-					nodes.splice(index, 1);
-					update();
-				}
-			}
-
-			this.addLink = function (sourceId, targetId) {
-				var sourceNode = findNode(sourceId);
-				var targetNode = findNode(targetId);
-
-				if((sourceNode !== undefined) && (targetNode !== undefined)) {
-					links.push({"source": sourceNode, "target": targetNode});
-					update();
-				}
-			}
-
-			var findNode = function (id) {
-				for (var i=0; i < nodes.length; i++) {
-					if (nodes[i].id === id)
-						return nodes[i]
-				};
-			}
-
-			var findNodeIndex = function (id) {
-				for (var i=0; i < nodes.length; i++) {
-					if (nodes[i].id === id)
-						return i
-				};
-			}
-
-			// set up the D3 visualisation in the specified element
-			var w = $(el).innerWidth(),
-				h = $(el).innerHeight();
-
-			var vis = this.vis = d3.select(el).append("svg:svg")
-				.attr("width", w)
-				.attr("height", h);
-
-			var force = d3.layout.force()
-				.gravity(.05)
-				.distance(100)
-				.charge(-100)
-				.size([w, h]);
-
-			var nodes = force.nodes(),
-				links = force.links();
-
-			var update = function () {
-
-				var link = vis.selectAll("line.link")
-					.data(links, function(d) { return d.source.id + "-" + d.target.id; });
-
-				link.enter().insert("line")
-					.attr("class", "link");
-
-				link.exit().remove();
-
-				var node = vis.selectAll("g.node")
-					.data(nodes, function(d) { return d.id;});
-
-				var nodeEnter = node.enter().append("g")
-					.attr("class", "node")
-					.call(force.drag)
-					.on("mouseenter", function(d,i) { 
-						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
-						var g = d3.select(this); // The node
-						// The class is used to remove the additional text later
-						var info = g.append('text')
-							.classed('info', true)
-							.attr('x', 20)
-							.attr('y', 10)
-							.text(function(d) {return d.id});
-						/*d3.selectAll("#tooltip")
-							.style("stroke", "black");
-						d3.select("#tooltip").style({
-							top: d3.event.clientY+5,
-							left: d3.event.clientX+5,
-							visibility: "visible",
-							opacity: 1
-						});
-						d3.select("#tooltip").text(function(d) {return d.id});*/
-					})
-					.on("mouseleave", function(d,i) {
-						// Remove the info text on mouse out.
-						d3.select(this).select('text.info').remove();
-						/*d3.selectAll("#tooltip")
-							.style("stroke", undefined);
-						d3.select("#tooltip").style({
-							visibility: "hidden",
-							opacity: 0
-						});*/
-					});
-
-				/*nodeEnter.append("image")
-					.attr("class", "circle")
-					.attr("xlink:href", "https://d3nwyuy0nl342s.cloudfront.net/images/icons/public.png")
-					.attr("x", "-8px")
-					.attr("y", "-8px")
-					.attr("width", "16px")
-					.attr("height", "16px");*/
-
-				/*nodeEnter.append("text")
-					.attr("class", "nodetext")
-					.attr("dx", 12)
-					.attr("dy", ".35em")
-					.style("opacity", 1)
-					.style("color", "black")
-					.text(function(d) {return d.id});*/
-				
-				var sizeScale = d3.scale.linear()
-					.range([20,1000])
-					.domain([0, patients.length]);
-			
-				var patientTotal = cohortPatientTotal()
-
-				nodeEnter.append("circle")
-					.attr("stroke", "steelblue")
-					.style("fill", "#fff")
-					//.attr("r", 10);
-					.attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
-					//.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
-					//.attr("strokewidth", 3px);
-
-
-				node.exit().remove();
-
-				force.on("tick", function() {
-				  link.attr("x1", function(d) { return d.source.x; })
-					  .attr("y1", function(d) { return d.source.y; })
-					  .attr("x2", function(d) { return d.target.x; })
-					  .attr("y2", function(d) { return d.target.y; });
-
-				  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-				});
-
-				// Restart the force layout.
-				force.start();
-			}
-
-			// Make it all go
-			update();
-		}
-		
 		function renderTopChart(chart, dimension, keyFunction, orderFunction, patientNumbersDict, selectedPatientNumbersDict, scalesDict, idString, selectedDict, filterStringsDict, filterStringFunction) {
 			var dataset = d3.nest()
 				.key(keyFunction)
@@ -1452,6 +1241,165 @@
 			buildDiagnosisList(selectedDataset);
 		}
 
+		function renderFilterGraph(el) {
+			// modified from http://stackoverflow.com/questions/9539294/adding-new-nodes-to-force-directed-layout
+			// Add and remove elements on the graph object
+			this.addNode = function (id) {
+				nodes.push({"id":id});
+				update();
+			}
+
+			this.removeNode = function (id) {
+				var i = 0;
+				var n = findNode(id);
+				while (i < links.length) {
+					if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
+					else i++;
+				}
+				var index = findNodeIndex(id);
+				if(index !== undefined) {
+					nodes.splice(index, 1);
+					update();
+				}
+			}
+
+			this.addLink = function (sourceId, targetId) {
+				var sourceNode = findNode(sourceId);
+				var targetNode = findNode(targetId);
+
+				if((sourceNode !== undefined) && (targetNode !== undefined)) {
+					links.push({"source": sourceNode, "target": targetNode});
+					update();
+				}
+			}
+
+			var findNode = function (id) {
+				for (var i=0; i < nodes.length; i++) {
+					if (nodes[i].id === id)
+						return nodes[i]
+				};
+			}
+
+			var findNodeIndex = function (id) {
+				for (var i=0; i < nodes.length; i++) {
+					if (nodes[i].id === id)
+						return i
+				};
+			}
+
+			// set up the D3 visualisation in the specified element
+			var w = $(el).innerWidth(),
+				h = $(el).innerHeight();
+
+			var vis = this.vis = d3.select(el).append("svg:svg")
+				.attr("width", w)
+				.attr("height", h);
+
+			var force = d3.layout.force()
+				.gravity(.05)
+				.distance(100)
+				.charge(-100)
+				.size([w, h]);
+
+			var nodes = force.nodes(),
+				links = force.links();
+
+			var update = function () {
+
+				var link = vis.selectAll("line.link")
+					.data(links, function(d) { return d.source.id + "-" + d.target.id; });
+
+				link.enter().insert("line")
+					.attr("class", "link");
+
+				link.exit().remove();
+
+				var node = vis.selectAll("g.node")
+					.data(nodes, function(d) { return d.id;});
+
+				var nodeEnter = node.enter().append("g")
+					.attr("class", "node")
+					.call(force.drag)
+					.on("mouseenter", function(d,i) { 
+						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
+						var g = d3.select(this); // The node
+						// The class is used to remove the additional text later
+						var info = g.append('text')
+							.classed('info', true)
+							.attr('x', 20)
+							.attr('y', 10)
+							.text(function(d) {return d.id});
+						/*d3.selectAll("#tooltip")
+							.style("stroke", "black");
+						d3.select("#tooltip").style({
+							top: d3.event.clientY+5,
+							left: d3.event.clientX+5,
+							visibility: "visible",
+							opacity: 1
+						});
+						d3.select("#tooltip").text(function(d) {return d.id});*/
+					})
+					.on("mouseleave", function(d,i) {
+						// Remove the info text on mouse out.
+						d3.select(this).select('text.info').remove();
+						/*d3.selectAll("#tooltip")
+							.style("stroke", undefined);
+						d3.select("#tooltip").style({
+							visibility: "hidden",
+							opacity: 0
+						});*/
+					});
+
+				/*nodeEnter.append("image")
+					.attr("class", "circle")
+					.attr("xlink:href", "https://d3nwyuy0nl342s.cloudfront.net/images/icons/public.png")
+					.attr("x", "-8px")
+					.attr("y", "-8px")
+					.attr("width", "16px")
+					.attr("height", "16px");*/
+
+				/*nodeEnter.append("text")
+					.attr("class", "nodetext")
+					.attr("dx", 12)
+					.attr("dy", ".35em")
+					.style("opacity", 1)
+					.style("color", "black")
+					.text(function(d) {return d.id});*/
+				
+				var sizeScale = d3.scale.linear()
+					.range([20,1000])
+					.domain([0, patients.length]);
+			
+				var patientTotal = cohortPatientTotal()
+
+				nodeEnter.append("circle")
+					.attr("stroke", "steelblue")
+					.style("fill", "#fff")
+					//.attr("r", 10);
+					.attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
+					//.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
+					//.attr("strokewidth", 3px);
+
+
+				node.exit().remove();
+
+				force.on("tick", function() {
+				  link.attr("x1", function(d) { return d.source.x; })
+					  .attr("y1", function(d) { return d.source.y; })
+					  .attr("x2", function(d) { return d.target.x; })
+					  .attr("y2", function(d) { return d.target.y; });
+
+				  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+				});
+
+				// Restart the force layout.
+				force.start();
+			}
+
+			// Make it all go
+			update();
+		}
+
 		function renderOasisChart() {
 			// Organize the initital dataset
 			var dataset = d3.nest()
@@ -1654,7 +1602,6 @@
 						updateData();
 					});
 			
-			// Can we add labels to these axes? Something like "Count" for y and for the admission type plot the actual admission type string for the x axis.
 			var xAxis = d3.svg.axis()
 				.scale(oasisScales.xScale)
 				.tickSize(-bottomChartInnerHeight)
@@ -1785,7 +1732,6 @@
 				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 			
-			// Can we add labels to these axes? Something like "Count" for y and for the admission type plot the actual admission type string for the x axis.
 			var xAxis = d3.svg.axis()
 				.scale(tdeathScales.xScale)
 				.tickSize(-bottomChartInnerHeight)
@@ -1801,20 +1747,14 @@
 		
 		// RENDER EVERYTHING
 
-		function resetTool()
-		{
+		function resetTool() {
 			location.reload();
 			d3.selectAll("svg > *").remove();
-			d3.json("https://raw.githubusercontent.com/harshanandrews/MIMIC-III/master/icd9_3.json", function(error, data) {
-				icd9 = data;
-			});
 
-			d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_4.json", function(error, data) {
-				patients = data;
-				init();
-				render();
-				renderLabels();
-			});
+			init();
+
+			render();
+			renderLabels();
 		}
 
 		function render() {
@@ -1822,7 +1762,6 @@
 			renderTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, agePatientNumbers, ageSelectedPatientNumbers, ageScales, "age", ageSelected, ageFilterStrings, ageFilterStringFunction);
 			renderTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexPatientNumbers, sexSelectedPatientNumbers, sexScales, "sex", sexSelected, sexFilterStrings, sexFilterStringFunction);
 			renderTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortPatientNumbers, mortSelectedPatientNumbers, mortScales, "mort", mortSelected, mortFilterStrings, mortFilterStringFunction);
-			//renderMortChart();
 			
 			renderDiagnosisList();
 
@@ -1831,131 +1770,81 @@
 		}
 
 		function renderLabels () {
-
 			//X-Axis labels
-			
 			admissChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
 				.text("Admission Type");
-
 			ageChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
-				.text("Age Category");
-
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
+				.text("Age Group");
 			sexChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
 				.text("Sex");
-
 			mortChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
 				.text("Mortality Category");
-
 			oasisChartWrapper.append("text")
 				.attr("x", chartMargin.left + 200)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
 				.text("OASIS Category");
-
 			tdeathChartWrapper.append("text")
 				.attr("x", chartMargin.left + 200)
-				.attr("y", chartMargin.top + 112)
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "9px")
-				.style("font-weight", "bold")
-				.text("Days till death");
+				.attr("y", chartMargin.top + 115)
+				.attr("class", "axislabel")
+				.text("Days till Death");
 
 			//Y-Axis Labels
-
 			admissChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -55)
 				.attr("y", 3)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
+				.attr("class", "axislabel")
 				.text("Records");
-
 			ageChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -55)
 				.attr("y", 3)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
+				.attr("class", "axislabel")
 				.text("Records");
-
 			sexChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -55)
 				.attr("y", 3)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
+				.attr("class", "axislabel")
 				.text("Records");
-
 			mortChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -55)
 				.attr("y", 3)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
+				.attr("class", "axislabel")
 				.text("Records");
-
 			oasisChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -55)
 				.attr("y", 3)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
+				.attr("class", "axislabel")
 				.text("Records");
-
 			tdeathChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
 				.attr("x", -50)
 				.attr("y", 10)
 				.attr("dy", "1em")
-				.style("text-anchor", "middle")
-				.style("font-family", "Garabond")
-				.style("font-size", "10px")
-				.style("font-weight", "bold")
-				.text("Death of patients (%)");
-
+				.attr("class", "axislabel")
+				.text("Death of Patients (%)");
 		}
 
 		// INITIALIZE

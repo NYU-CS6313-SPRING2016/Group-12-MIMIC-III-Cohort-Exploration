@@ -236,7 +236,7 @@
 				<div class="chart-title-search"> 
 					<input id = "query" type="text" class="query" placeholder="Search using ICD9/Desc..." size="25" maxlength="30">
 					<input type="button" value="Search" onClick="highlightSearch()">
-					<input type="button" value="Reset" onClick="resetTool()">
+					<input type="button" value="Reset Visualization" onClick="resetTool()">
 				</div>
 				<div id="scrolldiv" class="scroller">
 					<table id="diagnosislist">
@@ -1797,7 +1797,7 @@
 				.attr("x", chartMargin.left + 200)
 				.attr("y", chartMargin.top + 115)
 				.attr("class", "axislabel")
-				.text("Days till Death");
+				.text("Days until Death");
 
 			//Y-Axis Labels
 			admissChartWrapper.append("text")

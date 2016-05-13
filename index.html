@@ -499,7 +499,7 @@
 			// how many diagnoses to show in the list
 			// 50 seems fine
 			// (the whole dataset has little less than 4500)
-			var DIAGNOSIS_NUMBER = 5000;
+			//var DIAGNOSIS_NUMBER = 5000;
 			// how many diagnoses to consider when merging lists
 			// empirical testing suggests that factor of 7 is close to convergence point
 			// bigger numbers are more accurate but reduce performance by a power of 2
@@ -736,6 +736,10 @@
 		}
 		
 		function maxObjects(obj) {
+			// this is wrong
+			// it will select the maximum group
+			// but maxuimum doesn't mean selected!
+			// (more than one group may be selected) and then only the maximum one is shown!)
 			var max = undefined;
 			for( var el in obj ) 
 			{
@@ -1762,7 +1766,7 @@
 			renderTdeathChart();
 		}
 
-		function renderLabels() {
+		function renderLabels () {
 			//X-Axis labels
 			admissChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)

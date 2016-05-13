@@ -235,8 +235,8 @@
 				</div>
 				<div class="chart-title-search"> 
 					<input id = "query" type="text" class="query" placeholder="Search using ICD9/Desc..." size="25" maxlength="30">
-					<input type="button" value="Search" onClick="highlightSearch()">
-					<input type="button" value="Reset Visualization" onClick="resetTool()">
+					<input type="button" value="Search" onClick="searchButton()">
+					<input type="button" value="Reset Visualization" onClick="resetButton()">
 				</div>
 				<div id="scrolldiv" class="scroller">
 					<table id="diagnosislist">
@@ -478,112 +478,92 @@
 
 		// HELPER FUNCTIONS
 		// used for updates and renders
-		function getDiagnosisDataset() {
+		function addOrIncrement(dict, key) {
+			// this will break things because used to use an array of dicts
+			if (dict[key] === undefined) { dict[key] = 1; }
+			else { dict[key] += 1; }
+		}
+
+		function getDiagnosisDatasets() {
+			var query = document.getElementById("query").value.toLowerCase();
+			var foundICD9Codes = [];
+
+			if (query !== "") {
+				icd9.forEach(function(d) {
+					if (JSON.stringify(d).toLowerCase().includes(query)) {
+						foundICD9Codes.push(d.icd9);
+					}
+				});
+			}
+
 			// how many diagnoses to show in the list
 			// 50 seems fine
 			// (the whole dataset has little less than 4500)
-			var DIAGNOSIS_NUMBER = 50;
+			var DIAGNOSIS_NUMBER = 5000;
 			// how many diagnoses to consider when merging lists
 			// empirical testing suggests that factor of 7 is close to convergence point
 			// bigger numbers are more accurate but reduce performance by a power of 2
 			// this is because of the O(n^2) loops
-			var DIAGNOSIS_SUBLIST_NUMBER = DIAGNOSIS_NUMBER * 7;
+			//var DIAGNOSIS_SUBLIST_NUMBER = DIAGNOSIS_NUMBER * 7;
 
 			var selectedPatients = diagnosisDim.top(Infinity);
 
-			// 44 thousand records but O(n)
-			var group = diagnosisDim.group();
-			group.all().forEach(function(d) {
-				d.key = JSON.parse(d.key);
+			// Eww, O(n^3)
+			var selectedDatasetDict = {};
+			var foundDatasetDict = {};
+			selectedPatients.forEach(function (d) {
+				// d.key = {d1:d.d1, d2:d.d2, d3:d.d3};
+
+				var d1Found = false;
+				var d2Found = false;
+				var d3Found = false;
+				foundICD9Codes.forEach(function (f) {
+					if (f == d.d1) {
+						addOrIncrement(foundDatasetDict, d.d1);
+						d1Found = true;
+					}
+					if (f == d.d2) {
+						addOrIncrement(foundDatasetDict, d.d2);
+						d2Found = true;
+					}
+					if (f == d.d3) {
+						addOrIncrement(foundDatasetDict, d.d3);
+						d3Found = true;
+					}
+				});
+				if (!d1Found) {
+					addOrIncrement(selectedDatasetDict, d.d1);
+				}
+				if (!d2Found) {
+					addOrIncrement(selectedDatasetDict, d.d2);
+				}
+				if (!d3Found) {
+					addOrIncrement(selectedDatasetDict, d.d3);
+				}
 			});
 
-			var selectedPatients = group.all();
-
-			var d1Dataset = d3.nest()
-				.key(function (d) { return d.key.d1; })
-				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
-				.entries(selectedPatients);
-
-			d1Dataset.forEach(function(d) {
-				//d.d1 = d.key;
-				d.value = d.values;
-			});
-
-			d1Dataset
-				.sort(function(a,b) { return d3.descending(a.value, b.value); });
-
-			d1Dataset = d1Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
-
-			var d2Dataset = d3.nest()
-				.key(function (d) { return d.key.d2; })
-				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
-				.entries(selectedPatients);
-
-			d2Dataset.forEach(function(d) {
-				//d.d1 = d.key;
-				d.value = d.values;
-			});
-
-			d2Dataset
-				.sort(function(a,b) { return d3.descending(a.value, b.value); });
-
-			d2Dataset = d2Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
-
-			var d3Dataset = d3.nest()
-				.key(function (d) { return d.key.d3; })
-				.rollup(function(r) { return d3.sum(r, function(d) { return d.value; }); })
-				.entries(selectedPatients);
-
-			d3Dataset.forEach(function(d) {
-				//d.d1 = d.key;
-				d.value = d.values;
-			});
-
-			d3Dataset
-				.sort(function(a,b) { return d3.descending(a.value, b.value); });
-
-			d3Dataset = d3Dataset.slice(0,DIAGNOSIS_SUBLIST_NUMBER);
+			var foundDataset = [];
+			for (key in foundDatasetDict) {
+				foundDataset.push({'key':key, 'value':foundDatasetDict[key]});
+			}
 
 			var selectedDataset = [];
-
-			d1Dataset.forEach(function(d1Dict) {
-				if (d1Dict.key !== "undefined" && d1Dict.value > 0) {
-					selectedDataset.push(d1Dict);
-				}
-			});
-
-			d2Dataset.forEach(function(d2Dict) {
-				if (d2Dict.key !== "undefined" && d2Dict.value > 0) {
-					var keyFound = false;
-					selectedDataset.forEach(function(selectedDict) {
-						if (d2Dict.key === selectedDict.key) {
-							keyFound = true;
-							selectedDict.value += d2Dict.value;
-						}
-					});
-					if (!keyFound) { selectedDataset.push(d2Dict); }
-				}
-			});
-
-			d3Dataset.forEach(function(d3Dict) {
-				if (d3Dict.key !== "undefined" && d3Dict.value > 0) {
-					var keyFound = false;
-					selectedDataset.forEach(function(selectedDict) {
-						if (d3Dict.key === selectedDict.key) {
-							keyFound = true;
-							selectedDict.value += d3Dict.value;
-						}
-					});
-					if (!keyFound) { selectedDataset.push(d3Dict); }
-				}
-			});
+			for (key in selectedDatasetDict) {
+				selectedDataset.push({'key':key, 'value':selectedDatasetDict[key]});
+			}
 
 			selectedDataset
 				.sort(diagnosisOrderFunction);
 
-			selectedDataset = selectedDataset.slice(0,DIAGNOSIS_NUMBER);
+			//selectedDataset = selectedDataset.slice(0,DIAGNOSIS_NUMBER);
 
 			icd9.forEach(function(dict) {
+				foundDataset.forEach(function(foundDict) {
+					if (foundDict.key === dict.icd9) {
+						foundDict.short = dict.short;
+						foundDict.full = dict.full;
+					}
+				});
 				selectedDataset.forEach(function(selectedDict) {
 					if (selectedDict.key === dict.icd9) {
 						selectedDict.short = dict.short;
@@ -592,37 +572,10 @@
 				});
 			});
 
-			return selectedDataset;
+			return [foundDataset, selectedDataset];
 		}
 
-		function highlightSearch() {
-			var text = document.getElementById("query").value;
-			var query = new RegExp("(\\b" + text + "\\b)", "gim");
-			var searchField = "full";
-			var newDataset = [];
-
-			for( var i = 0; i < icd9.length; i++){
-				var el = icd9[i];
-				//var str = JSON.stringify(el.full).toLowerCase();
-				//console.log(text);
-				//console.log(str);
-
-
-				if(JSON.stringify(el).toLowerCase().includes(text)){
-					newDataset.push(el);
-				}
-			}
-
-			console.log(newDataset);
-
-			buildModDiagnosisList(newDataset);
-			//buildDiagnosisList(newDataset);
-		}
-
-		function buildModDiagnosisList(selectedDataset){
-			diagnosisList.selectAll("tr")
-				.remove();
-
+		function buildDiagnosisList(foundDataset, selectedDataset) {
 			var headTr = diagnosisList
 				.append("tr")
 				.attr("class", "header")
@@ -635,12 +588,17 @@
 				.attr("class", "shortdesc")
 				.text("Description")
 
-
-			var tr = diagnosisList.selectAll("tr.diagnosis")
-				.data(selectedDataset, function(d,i) {return d.icd9; })
+			var tr1 = diagnosisList.selectAll("tr.founddiagnosis")
+				.data(foundDataset, function(d,i) { return d.key; })
 				.enter()
 				.append("tr")
-				.attr("id", function(d) { return "diagnosis"+d.icd9; })
+				.attr("id", function(d) { return "diagnosis"+d.key; })
+				.attr("class", function(d) {
+					if (diagnosisSelected[d3.select(this).attr("id")] === undefined) {
+						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
+					}
+					return diagnosisSelected[d3.select(this).attr("id")];
+				})
 				.on("mouseenter", function(d,i) {
 					d3.select(this).style({
 						background: "cornflowerblue",
@@ -663,53 +621,47 @@
 						visibility: "hidden",
 						opacity: 0
 					});
-				});
+				})
+				.on("click", function(d,i) {
+					if (d3.select(this).attr("class") == "unselected") {
+						d3.select(this).attr("class", "selected");
+						diagnosisSelected[d3.select(this).attr("id")] = "selected";
 
-			tr
+						var filter = diagnosisFilterStringFunction(d.key);
+
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "f = f || "+filter+";";
+					}
+					else {
+						d3.select(this).attr("class", "unselected");
+						diagnosisSelected[d3.select(this).attr("id")] = "unselected";
+
+						diagnosisFilterStrings[d3.select(this).attr("id")] = "";
+					}
+
+					// ugly ugly hack
+					var filterString = "";
+					for (var key in diagnosisFilterStrings) {
+						var value = diagnosisFilterStrings[key];
+						filterString += value;
+					}
+					
+					var filterFunction = null;
+					if (filterString !== "") {
+						filterFunction = new Function("d", "var j = JSON.parse(d);var f = null;"+filterString+"return f;");
+					}
+					diagnosisDim.filter(filterFunction);
+					updateData();
+				});
+			tr1
 				.append("td")
 				.attr("class", "icd9")
-				.text(function(d) { return d.icd9; })
-			tr
+				.text(function(d) { return '☞'+d.key; })
+			tr1
 				.append("td")
 				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
-		}
 
-		function updateModData(selectedDataset) {
-			updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
-			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
-			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
-			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
-
-			updateModDiagnosisList(selectedDataset);
-
-			updateOasisChart();
-			updateTdeathChart();
-
-			updateFlowChart();
-		}
-
-		function updateModDiagnosisList(selectedDataset) {
-			diagnosisList.selectAll("tr")
-				.remove();
-
-			buildModDiagnosisList(selectedDataset);
-		}
-
-		function buildDiagnosisList(selectedDataset) {
-			var headTr = diagnosisList
-				.append("tr")
-				.attr("class", "header")
-			headTr
-				.append("th")
-				.attr("class", "icd9")
-				.text("ICD-9")
-			headTr
-				.append("th")
-				.attr("class", "shortdesc")
-				.text("Description")
-
-			var tr = diagnosisList.selectAll("tr.diagnosis")
+			var tr2 = diagnosisList.selectAll("tr.diagnosis")
 				.data(selectedDataset, function(d,i) { return d.key; })
 				.enter()
 				.append("tr")
@@ -773,11 +725,11 @@
 					diagnosisDim.filter(filterFunction);
 					updateData();
 				});
-			tr
+			tr2
 				.append("td")
 				.attr("class", "icd9")
 				.text(function(d) { return d.key; })
-			tr
+			tr2
 				.append("td")
 				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
@@ -874,12 +826,14 @@
 		}
 
 		function updateDiagnosisList() {
-			var selectedDataset = getDiagnosisDataset();
+			var diagnosisDatasets = getDiagnosisDatasets();
+			var foundDataset = diagnosisDatasets[0];
+			var selectedDataset = diagnosisDatasets[1];
 
 			diagnosisList.selectAll("tr")
 				.remove();
 
-			buildDiagnosisList(selectedDataset);
+			buildDiagnosisList(foundDataset, selectedDataset);
 		}
 
 		function updateFlowChart() {
@@ -1233,9 +1187,11 @@
 		}
 
 		function renderDiagnosisList() {
-			var selectedDataset = getDiagnosisDataset();
+			var diagnosisDatasets = getDiagnosisDatasets();
+			var foundDataset = diagnosisDatasets[0];
+			var selectedDataset = diagnosisDatasets[1];
 
-			buildDiagnosisList(selectedDataset);
+			buildDiagnosisList(foundDataset, selectedDataset);
 		}
 
 		function renderFilterGraph(el) {
@@ -1742,9 +1698,13 @@
 			yAxisGroup.call(yAxis);
 		}
 		
-		// RENDER EVERYTHING
+		// BUTTONS
 
-		function resetTool() {
+		function searchButton() {
+			updateData();
+		}
+
+		function resetButton() {
 			location.reload();
 			d3.selectAll("svg > *").remove();
 
@@ -1753,6 +1713,8 @@
 			render();
 			renderLabels();
 		}
+
+		// RENDER
 
 		function render() {
 			renderTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissPatientNumbers, admissSelectedPatientNumbers, admissScales, "admiss", admissSelected, admissFilterStrings, admissFilterStringFunction);

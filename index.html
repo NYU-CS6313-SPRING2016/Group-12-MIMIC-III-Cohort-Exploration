@@ -133,10 +133,10 @@
 
 			}
 			#diagnosisList th.icd9 {
-				width: 65px;
+				width: 75px;
 			}
 			#diagnosislist td.icd9 {
-				width: 65px;
+				width: 75px;
 			}
 
 			#oasischart rect {
@@ -1705,13 +1705,47 @@
 		}
 
 		function resetButton() {
-			location.reload();
-			d3.selectAll("svg > *").remove();
+			admissPatientNumbers = {};
+			agePatientNumbers = {};
+			sexPatientNumbers = {};
+			mortPatientNumbers = {};
+			//diagnosisPatientNumbers not applicable
+			oasisPatientNumbers = {};
+			tdeathPatientNumbers = {};
+			
+			admissSelectedPatientNumbers = {};
+			ageSelectedPatientNumbers = {};
+			sexSelectedPatientNumbers = {};
+			mortSelectedPatientNumbers = {};
+			//diagnosisSelectedPatientNumbers not applicable
+			oasisSelectedPatientNumbers = {};
+			tdeathSelectedPatientNumbers = {};
 
-			init();
+			admissSelected = {};
+			ageSelected = {};
+			sexSelected = {};
+			mortSelected = {};
+			diagnosisSelected = {};
+			oasisSelected = {};
+			//tdeathSelected not applicable (nothing to click)
 
-			render();
-			renderLabels();
+			admissFilterStrings = {};
+			ageFilterStrings = {};
+			sexFilterStrings = {};
+			mortFilterStrings = {};
+			diagnosisFilterStrings = {};
+			oasisFilterStrings = {};
+			//tdeathFilterStrings not applicable (nothing to click)
+
+			admissDim.filterAll();
+			ageDim.filterAll();
+			sexDim.filterAll();
+			mortDim.filterAll();
+			diagnosisDim.filterAll();
+			oasisDim.filterAll();
+			tdeathDim.filterAll();
+
+			updateData();
 		}
 
 		// RENDER
@@ -1728,7 +1762,7 @@
 			renderTdeathChart();
 		}
 
-		function renderLabels () {
+		function renderLabels() {
 			//X-Axis labels
 			admissChartWrapper.append("text")
 				.attr("x", chartMargin.left + 100)

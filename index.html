@@ -735,37 +735,16 @@
 				.text(function(d) { return d.short; })
 		}
 		
-		function maxObjects(obj) {
-			// this is wrong
-			// it will select the maximum group
-			// but maxuimum doesn't mean selected!
-			// (more than one group may be selected) and then only the maximum one is shown!)
-			var max = undefined;
-			for( var el in obj ) 
-			{
-				if( obj.hasOwnProperty( el ) ) 
-				{
-					if (max == undefined){
-						max = obj[el]}
-					else if (obj[el] > max){
-						max = obj[el]}
-				  //sum += parseFloat( obj[el] );
-				}
-			}
-			//console.log(max)
-			return max;
-		}
 		
-		function cohortPatientTotal() {
-			/*var admissSelectedPatientNumbers = {};
-			var ageSelectedPatientNumbers = {};
-			var sexSelectedPatientNumbers = {};
-			var mortSelectedPatientNumbers = {};*/
-			var a = maxObjects(admissSelectedPatientNumbers)
-			var b = maxObjects(ageSelectedPatientNumbers)
-			var c = maxObjects(sexSelectedPatientNumbers)
-			var d = maxObjects(mortSelectedPatientNumbers)
-			return Math.max(a,b,c,d);
+		function cohortPatientTotal(obj) {
+			//now it just adds the total number of patients in the ageSelectedPatients
+			var sum = 0;
+            for (var el in obj)
+                {
+                    if(obj.hasOwnProperty( el ))
+                    { sum += obj[el] } 
+                }
+            return sum;
 		}
 
 		// UPDATE CHART FUNCTIONS
@@ -843,7 +822,7 @@
 		function updateFlowChart() {
 			// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
 			
-			var patientTotal = cohortPatientTotal()
+			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers)
 			var parNode = nodeNum
 			nodeNum = patientTotal
 			graph.addNode(nodeNum);
@@ -1327,7 +1306,7 @@
 					.range([20,1000])
 					.domain([0, patients.length]);
 			
-				var patientTotal = cohortPatientTotal()
+				var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers)
 
 				nodeEnter.append("circle")
 					.attr("stroke", "steelblue")

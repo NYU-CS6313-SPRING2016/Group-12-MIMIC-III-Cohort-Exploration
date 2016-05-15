@@ -344,7 +344,7 @@
         var flowChart = d3.select("#flowchart")
             //.attr("width", width + margin.right + margin.left)
 	        //.attr("height", height + margin.top + margin.bottom)
-            .append("g")
+            //.append("g")
 	        .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
         
 
@@ -778,40 +778,9 @@
 				.append("td")
 				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
-		}
-		
-		function maxObjects(obj) {
-			// this is wrong
-			// it will select the maximum group
-			// but maxuimum doesn't mean selected!
-			// (more than one group may be selected) and then only the maximum one is shown!)
-			var max = undefined;
-			for( var el in obj ) 
-			{
-				if( obj.hasOwnProperty( el ) ) 
-				{
-					if (max == undefined){
-						max = obj[el]}
-					else if (obj[el] > max){
-						max = obj[el]}
-				  //sum += parseFloat( obj[el] );
-				}
-			}
-			//console.log(max)
-			return max;
-		}
-        
+		}    
 		
 		function cohortPatientTotal(obj) {
-			/*var admissSelectedPatientNumbers = {};
-			var ageSelectedPatientNumbers = {};
-			var sexSelectedPatientNumbers = {};
-			var mortSelectedPatientNumbers = {};*/
-			/*var a = maxObjects(admissSelectedPatientNumbers)
-			var b = maxObjects(ageSelectedPatientNumbers)
-			var c = maxObjects(sexSelectedPatientNumbers)
-			var d = maxObjects(mortSelectedPatientNumbers)
-			return Math.max(a,b,c,d);*/
             var sum = 0;
             for (var el in obj)
                 {
@@ -856,6 +825,26 @@
 
             renderFlowChart(currNode);
             return(myJSONObject);
+        }
+        
+        function chopDownTree(){
+            //just until I make a more elegant solution
+            console.log("clear the tree");
+            flowChart.selectAll('g.node').remove();
+            flowChart.selectAll('path.link').remove();
+            treeData = [
+                  {
+                    "name": "Top Level",
+                    "parent": "null",
+                    "children": [],
+                    "filter": 'something'
+                  }
+            ];
+            root = treeData[0];
+            root.x0 = 150;
+            root.y0 = 0;
+            parent = root;
+            renderFlowChart(root);
         }
 
 		// UPDATE CHART FUNCTIONS
@@ -931,18 +920,16 @@
 		}
 
 		function updateFlowChart() {
-			// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
-			
 			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers);
             var newParent;
             var newNodeName;
 			newNodeName = patientTotal
             newParent = createTreeNode(parent, newNodeName);
-            console.log(newNodeName)
-            console.log("parNode = " + parent.name)
+            //console.log(newNodeName)
+            //console.log("parNode = " + parent.name)
             newNodeName = parent.name - newNodeName;
-            console.log(newNodeName)
-            createTreeNode(parent, newNodeName);
+            //console.log(newNodeName)
+            //createTreeNode(parent, newNodeName);
             parent = newParent;
 		}
 		
@@ -1292,6 +1279,7 @@
 		function renderFlowChart(source) {
             // Modified from http://www.d3noob.org/2014/01/tree-diagrams-in-d3js_11.html
             // and http://codesanswer.com/question/84585-d3-js-how-to-dynamically-add-nodes-to-a-tree
+            // Now the tree doesn't want to move out of the top portion of the chart...
 			 // Compute the new tree layout.
             //console.log("root = " + root.x0)
               var nodes = tree.nodes(root).reverse(),
@@ -1402,7 +1390,7 @@
                 d.y0 = d.y;
               });
             //console.log("root = " + root.x0)
-            }
+        }
 
 
 		function renderOasisChart() {
@@ -1796,8 +1784,10 @@
 			diagnosisDim.filterAll();
 			oasisDim.filterAll();
 			tdeathDim.filterAll();
-
+            
 			updateData();
+            console.log("reset")
+            chopDownTree(); // The tree doesn't want to fall down either...
 		}
 
 		// RENDER

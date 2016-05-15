@@ -320,7 +320,7 @@
           }
         ];
         var tree = d3.layout.tree()
-	        //.size([height, width]);
+	        //.size([300, 912]);
         var diagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.y, d.x]; });
         root = treeData[0];
@@ -799,7 +799,7 @@
                 return
             }
             var currentNode = tree.nodes(currNode)
-            var myJSONObject = {"name": newNode, "parent": currNode.name, "children": [], "filter": "something"};
+            var myJSONObject = {"name": newNode, "parent": currNode, "children": [], "filter": "something"};
             if (currentNode[0].children != null){
                 currentNode[0].children.push(myJSONObject);
                 console.log(currentNode[0].children);
@@ -807,12 +807,6 @@
                 //source.children = source._children;
                 //source._children = null;
             }
-
-            /*else if(currentNode[0].children != null && currentNode[0]._children != null){
-                currentNode[0].children.push(myJSONObject);
-                console.log(currentNode[0].children);
-                console.log('again');
-            }*/
 
             else{
                 currentNode[0].children = []
@@ -825,6 +819,23 @@
 
             renderFlowChart(currNode);
             return(myJSONObject);
+        }
+        
+        function previousFilter(){
+            //returns the graphs to a previous filtering step
+            /*updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
+			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
+			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
+
+			updateDiagnosisList();
+
+			updateOasisChart();
+			updateTdeathChart();
+
+			updateFlowChart();*/
+            
+            
         }
         
         function chopDownTree(){
@@ -846,6 +857,7 @@
             parent = root;
             renderFlowChart(root);
         }
+        
 
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
@@ -925,9 +937,10 @@
             var newNodeName;
 			newNodeName = patientTotal
             newParent = createTreeNode(parent, newNodeName);
+            //removed creation of second node for the time being
             //console.log(newNodeName)
             //console.log("parNode = " + parent.name)
-            newNodeName = parent.name - newNodeName;
+            //newNodeName = parent.name - newNodeName;
             //console.log(newNodeName)
             //createTreeNode(parent, newNodeName);
             parent = newParent;
@@ -1296,7 +1309,7 @@
               var nodeEnter = node.enter().append("g")
                   .attr("class", "node")
                   .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-                  //.on("click", createTreeNode);
+                  .on("click", previousFilter())
                   .on("mouseenter", function(d,i) { 
 						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
 						var g = d3.select(this); // The node

@@ -325,8 +325,8 @@
             .projection(function(d) { return [d.y, d.x]; });
         root = treeData[0];
         // should be root.x0 = height of flowchart/2 but using main
-        root.x0 = 150;
-        root.y0 = 0;
+        root.x0 = 200;
+        root.y0 = 150;
         //d3.select(self.frameElement).style( "topChartWidth", "500px");
 		
 		/*var nodes = [];
@@ -1297,6 +1297,7 @@
             //console.log("root = " + root.x0)
               var nodes = tree.nodes(root).reverse(),
                   links = tree.links(nodes);
+            console.log("root = " + root.x0)
 
               // Normalize for fixed-depth.
               nodes.forEach(function(d) { d.y = d.depth * 180; });
@@ -1328,11 +1329,11 @@
 					});
                   
               var sizeScale = d3.scale.linear()
-					.range([10,1000])
+					.range([10,1800])
 					.domain([0, patients.length]);
 
               nodeEnter.append("circle")
-                  .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
+                  .attr("r", 1e-6)
                   .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
               nodeEnter.append("text")

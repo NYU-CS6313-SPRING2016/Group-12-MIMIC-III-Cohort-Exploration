@@ -189,6 +189,22 @@
 				visibility: hidden;
 				transition: all 0.5s;
 			}
+            
+            .node circle {
+              fill: #fff;
+              stroke: steelblue;
+              stroke-width: 3px;
+            }
+
+            .node text {
+              font: 12px sans-serif;
+            }
+
+            .link {
+              fill: none;
+              stroke: #ccc;
+              stroke-width: 2px;
+            }
 		</style>
 	</head>
 	<body>
@@ -289,11 +305,22 @@
 		var icd9;
 		var patients;
 		var cf;
-		
-		var nodes = [];
-		var links = [];
-		var nodeNum;
-		var parent;
+        
+        //Tree Setup and variables
+        var i = 0,
+	       duration = 750,
+	       root;
+        var parent;
+        var treeData = [];
+        var tree = d3.layout.tree()
+	        //.size([300, 912]);
+        var diagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.y, d.x]; });
+        //root = treeData[0];
+        // should be root.x0 = height of flowchart/2 but using main
+        //root.x0 = 200;
+        //root.y0 = 150;
+        //d3.select(self.frameElement).style( "topChartWidth", "500px");
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -302,7 +329,12 @@
 		var diagnosisList = d3.select("#diagnosislist");
 		var oasisChart = d3.select("#oasischart");
 		var tdeathChart = d3.select("#tdeathchart");
-
+        var flowChart = d3.select("#flowchart")
+            .attr("width", 912)
+	        .attr("height", 300)
+            .append("g")
+	        .attr("transform", "translate(" + 75 + "," + 150 + ")");
+  
 		var admissChartWrapper = admissChart.append('g');
 		var ageChartWrapper = ageChart.append('g');
 		var sexChartWrapper = sexChart.append('g');
@@ -733,12 +765,10 @@
 				.append("td")
 				.attr("class", "shortdesc")
 				.text(function(d) { return d.short; })
-		}
-		
+		}    
 		
 		function cohortPatientTotal(obj) {
-			//now it just adds the total number of patients in the ageSelectedPatients
-			var sum = 0;
+            var sum = 0;
             for (var el in obj)
                 {
                     if(obj.hasOwnProperty( el ))
@@ -746,6 +776,155 @@
                 }
             return sum;
 		}
+        
+        function createTreeNode(currNode, newNode){
+            //adds a new node to the tree
+            console.log(currNode.name)
+            console.log("new Node = " + newNode)
+            if (newNode <= 0) { 
+                console.log("cohort too small") 
+                return
+            }
+            var currentNode = tree.nodes(currNode)
+            var myJSONObject = {
+                "name": newNode, 
+                "parent": currNode, 
+                "children": [],                 
+                "admissPatientNumbers": admissPatientNumbers,
+                "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                "admissFilterStrings": admissFilterStrings,
+                "admissSelected": admissSelected,
+                "agePatientNumbers": agePatientNumbers,
+                "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                "ageSelected": ageSelected,
+                "ageFilterStrings": ageFilterStrings,
+                "sexPatientNumbers": sexPatientNumbers,
+                "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                "sexSelected": sexSelected,
+                "sexFilterStrings": sexFilterStrings,
+                "mortPatientNumbers": mortPatientNumbers,
+                "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                "mortSelected": mortSelected,
+                "mortFilterStrings": mortFilterStrings,
+                "oasisPatientNumbers": oasisPatientNumbers,
+                "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+                "oasisSelected": oasisSelected,
+                "oasisFilterStrings": oasisFilterStrings,
+                "diagnosisSelected": diagnosisSelected,
+                "diagnosisFilterStrings": diagnosisFilterStrings,
+                "tdeathPatientNumbers": tdeathPatientNumbers,
+                "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+            };
+            if (currentNode[0].children != null){
+                currentNode[0].children.push(myJSONObject);
+                console.log(currentNode[0].children);
+                console.log('sibling children');
+                //source.children = source._children;
+                //source._children = null;
+            }
+
+            else{
+                currentNode[0].children = []
+                currentNode[0].children.push(myJSONObject);
+                console.log(currentNode[0].children);
+                console.log('first child');
+            }
+
+            tree.links(currentNode).push(currentNode[currentNode.length - 1]);
+
+            renderFlowChart(currNode);
+            return(myJSONObject);
+        }
+        
+        function previousFilter(currNode){
+            //returns the graphs to a previous filtering step
+            console.log("returning to a previous filter")
+            //console.log(currNode)
+            //console.log("filter at Node: " + currNode.name)
+            parent = currNode;
+            //var currentNode = tree.nodes(currNode)
+            
+            admissPatientNumbers = currNode.admissPatientNumbers
+			agePatientNumbers = currNode.agePatientNumbers
+			sexPatientNumbers = currNode.sexPatientNumbers
+			mortPatientNumbers = currNode.mortPatientNumbers
+			oasisPatientNumbers = currNode.oasisPatientNumbers
+			tdeathPatientNumbers = currNode.tdeathPatientNumbers
+			
+			admissSelectedPatientNumbers = currNode.admissSelectedPatientNumbers
+			ageSelectedPatientNumbers = currNode.ageSelectedPatientNumbers
+			sexSelectedPatientNumbers = currNode.sexSelectedPatientNumbers
+			mortSelectedPatientNumbers = currNode.mortSelectedPatientNumbers
+			oasisSelectedPatientNumbers = currNode.oasisSelectedPatientNumbers
+			tdeathSelectedPatientNumbers = currNode.tdeathSelectedPatientNumbers
+
+			admissSelected = currNode.admissSelected
+			ageSelected = currNode.ageSelected
+			sexSelected = currNode.sexSelected
+			mortSelected = currNode.mortSelected
+			diagnosisSelected = currNode.diagnosisSelected
+			oasisSelected = currNode.oasisSelected
+            
+			admissFilterStrings = currNode.admissFilterStrings
+			ageFilterStrings = currNode.ageFilterStrings
+			sexFilterStrings = currNode.sexFilterStrings
+			mortFilterStrings = currNode.mortFilterStrings
+			diagnosisFilterStrings = currNode.diagnosisFilterStrings
+			oasisFilterStrings = currNode.oasisFilterStrings
+            
+            updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
+			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
+			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
+            updateDiagnosisList();
+            updateOasisChart();
+			updateTdeathChart();
+            
+        }
+        
+        function chopDownTree(){
+            //just until I make a more elegant solution
+            console.log("clear the tree");
+            flowChart.selectAll('g.node').remove();
+            flowChart.selectAll('path.link').remove();
+            treeData = [
+                  {
+                        "name": patients.length, 
+                        "parent": "null", 
+                        "children": [],
+                        "admissPatientNumbers": admissPatientNumbers,
+                        "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                        "admissFilterStrings": admissFilterStrings,
+                        "admissSelected": admissSelected,
+                        "agePatientNumbers": agePatientNumbers,
+                        "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                        "ageSelected": ageSelected,
+                        "ageFilterStrings": ageFilterStrings,
+                        "sexPatientNumbers": sexPatientNumbers,
+                        "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                        "sexSelected": sexSelected,
+                        "sexFilterStrings": sexFilterStrings,
+                        "mortPatientNumbers": mortPatientNumbers,
+                        "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                        "mortSelected": mortSelected,
+                        "mortFilterStrings": mortFilterStrings,
+                        "oasisPatientNumbers": oasisPatientNumbers,
+                        "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+                        "oasisSelected": oasisSelected,
+                        "oasisFilterStrings": oasisFilterStrings,
+                        "diagnosisSelected": diagnosisSelected,
+                        "diagnosisFilterStrings": diagnosisFilterStrings,
+                        "tdeathPatientNumbers": tdeathPatientNumbers,
+                        "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+              }
+            ];
+            root = treeData[0];
+            root.x0 = 300;
+            root.y0 = 300;
+            parent = root;
+            renderFlowChart(root);
+        }
+        
 
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
@@ -820,18 +999,18 @@
 		}
 
 		function updateFlowChart() {
-			// can't figure out why the link isn't showing up in the vis, shows up in sample program I made
-			
-			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers)
-			var parNode = nodeNum
-			nodeNum = patientTotal
-			graph.addNode(nodeNum);
-			graph.addLink(parent, String(nodeNum));
-			nodeNum = parNode - nodeNum;
-			var adult = String(nodeNum);
-			graph.addNode(nodeNum)
-			graph.addLink(parent, String(nodeNum))
-			parent = adult;
+			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers);
+            var newParent;
+            var newNodeName;
+			newNodeName = patientTotal
+            newParent = createTreeNode(parent, newNodeName);
+            //removed creation of second node for the time being
+            //console.log(newNodeName)
+            //console.log("parNode = " + parent.name)
+            //newNodeName = parent.name - newNodeName;
+            //console.log(newNodeName)
+            //createTreeNode(parent, newNodeName);
+            parent = newParent;
 		}
 		
 		function updateOasisChart() {
@@ -962,8 +1141,9 @@
 
 			updateOasisChart();
 			updateTdeathChart();
+            updateFlowChart();
 
-			updateFlowChart();
+			
 		}
 
 		// RENDER CHART FUNCTIONS
@@ -1177,86 +1357,28 @@
 			buildDiagnosisList(foundDataset, selectedDataset);
 		}
 
-		function renderFilterGraph(el) {
-			// modified from http://stackoverflow.com/questions/9539294/adding-new-nodes-to-force-directed-layout
-			// Add and remove elements on the graph object
-			this.addNode = function (id) {
-				nodes.push({"id":id});
-				update();
-			}
+		function renderFlowChart(source) {
+            // Modified from http://www.d3noob.org/2014/01/tree-diagrams-in-d3js_11.html
+            // and http://codesanswer.com/question/84585-d3-js-how-to-dynamically-add-nodes-to-a-tree
+            // Now the tree doesn't want to move out of the top portion of the chart...
+			 // Compute the new tree layout.
+            //console.log("root = " + root.x0)
+              var nodes = tree.nodes(root).reverse(),
+                  links = tree.links(nodes);
+            console.log("root = " + root.x0)
 
-			this.removeNode = function (id) {
-				var i = 0;
-				var n = findNode(id);
-				while (i < links.length) {
-					if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
-					else i++;
-				}
-				var index = findNodeIndex(id);
-				if(index !== undefined) {
-					nodes.splice(index, 1);
-					update();
-				}
-			}
+              // Normalize for fixed-depth.
+              nodes.forEach(function(d) { d.y = d.depth * 180; });
 
-			this.addLink = function (sourceId, targetId) {
-				var sourceNode = findNode(sourceId);
-				var targetNode = findNode(targetId);
+              // Update the nodes…
+              var node = flowChart.selectAll("g.node")
+                  .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
-				if((sourceNode !== undefined) && (targetNode !== undefined)) {
-					links.push({"source": sourceNode, "target": targetNode});
-					update();
-				}
-			}
-
-			var findNode = function (id) {
-				for (var i=0; i < nodes.length; i++) {
-					if (nodes[i].id === id)
-						return nodes[i]
-				};
-			}
-
-			var findNodeIndex = function (id) {
-				for (var i=0; i < nodes.length; i++) {
-					if (nodes[i].id === id)
-						return i
-				};
-			}
-
-			// set up the D3 visualisation in the specified element
-			var w = $(el).innerWidth(),
-				h = $(el).innerHeight();
-
-			var vis = this.vis = d3.select(el).append("svg:svg")
-				.attr("width", w)
-				.attr("height", h);
-
-			var force = d3.layout.force()
-				.gravity(.05)
-				.distance(100)
-				.charge(-100)
-				.size([w, h]);
-
-			var nodes = force.nodes(),
-				links = force.links();
-
-			var update = function () {
-
-				var link = vis.selectAll("line.link")
-					.data(links, function(d) { return d.source.id + "-" + d.target.id; });
-
-				link.enter().insert("line")
-					.attr("class", "link");
-
-				link.exit().remove();
-
-				var node = vis.selectAll("g.node")
-					.data(nodes, function(d) { return d.id;});
-
-				var nodeEnter = node.enter().append("g")
-					.attr("class", "node")
-					.call(force.drag)
-					.on("mouseenter", function(d,i) { 
+              // Enter any new nodes at the parent's previous position.
+              var nodeEnter = node.enter().append("g")
+                  .attr("class", "node")
+                  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+                  .on("mouseenter", function(d,i) { 
 						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
 						var g = d3.select(this); // The node
 						// The class is used to remove the additional text later
@@ -1264,77 +1386,99 @@
 							.classed('info', true)
 							.attr('x', 20)
 							.attr('y', 10)
-							.text(function(d) {return d.id});
-						/*d3.selectAll("#tooltip")
-							.style("stroke", "black");
-						d3.select("#tooltip").style({
-							top: d3.event.clientY+5,
-							left: d3.event.clientX+5,
-							visibility: "visible",
-							opacity: 1
-						});
-						d3.select("#tooltip").text(function(d) {return d.id});*/
-					})
+							.text(function(d) {return d.name});
+						
+				    })
 					.on("mouseleave", function(d,i) {
 						// Remove the info text on mouse out.
 						d3.select(this).select('text.info').remove();
-						/*d3.selectAll("#tooltip")
-							.style("stroke", undefined);
-						d3.select("#tooltip").style({
-							visibility: "hidden",
-							opacity: 0
-						});*/
-					});
-
-				/*nodeEnter.append("image")
-					.attr("class", "circle")
-					.attr("xlink:href", "https://d3nwyuy0nl342s.cloudfront.net/images/icons/public.png")
-					.attr("x", "-8px")
-					.attr("y", "-8px")
-					.attr("width", "16px")
-					.attr("height", "16px");*/
-
-				/*nodeEnter.append("text")
-					.attr("class", "nodetext")
-					.attr("dx", 12)
-					.attr("dy", ".35em")
-					.style("opacity", 1)
-					.style("color", "black")
-					.text(function(d) {return d.id});*/
-				
-				var sizeScale = d3.scale.linear()
-					.range([20,1000])
+						
+					})
+                //.on("click", previousFilter(d3.select(this)));
+                .on("click", function(d,i){
+                   var currNode = d;
+                    console.log(currNode)
+                    previousFilter(currNode);
+                });
+                  
+              var sizeScale = d3.scale.linear()
+					.range([10,1800])
 					.domain([0, patients.length]);
-			
-				var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers)
 
-				nodeEnter.append("circle")
-					.attr("stroke", "steelblue")
-					.style("fill", "#fff")
-					//.attr("r", 10);
-					.attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.id)) / Math.PI) });
-					//.attr("r", function(d) { return Math.sqrt(sizeScale(patientTotal) / Math.PI) });
-					//.attr("strokewidth", 3px);
+              nodeEnter.append("circle")
+                  .attr("r", 1e-6)
+                  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
+              nodeEnter.append("text")
+                  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+                  .attr("dy", ".35em")
+                  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+                  .text(function(d) { return d.name; })
+                  .style("fill-opacity", 1e-6);
 
-				node.exit().remove();
+              // Transition nodes to their new position.
+              var nodeUpdate = node.transition()
+                  .duration(duration)
+                  .attr("transform", function(d) { 
+                      //console.log(d.x, d.y)
+                      return "translate(" + d.y + "," + d.x + ")"; });
+            
 
-				force.on("tick", function() {
-				  link.attr("x1", function(d) { return d.source.x; })
-					  .attr("y1", function(d) { return d.source.y; })
-					  .attr("x2", function(d) { return d.target.x; })
-					  .attr("y2", function(d) { return d.target.y; });
+              nodeUpdate.select("circle")
+                  .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
+                  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
-				  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-				});
+              nodeUpdate.select("text")
+                  .style("fill-opacity", 1);
 
-				// Restart the force layout.
-				force.start();
-			}
+              // Transition exiting nodes to the parent's new position.
+              /*var nodeExit = node.exit().transition()
+                  .duration(duration)
+                  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+                  .remove();
 
-			// Make it all go
-			update();
-		}
+              nodeExit.select("circle")
+                  .attr("r", 1e-6);
+
+              nodeExit.select("text")
+                  .style("fill-opacity", 1e-6);*/
+
+              // Update the links…
+              var link = flowChart.selectAll("path.link")
+                  .data(links, function(d) { return d.target.id; });
+
+              // Enter any new links at the parent's previous position.
+              link.enter().insert("path", "g")
+                  .attr("class", "link")
+                  .attr("d", function(d) {
+                    var o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                  });
+
+              // Transition links to their new position.
+              link.transition()
+                  .duration(duration)
+                  .attr("d", diagonal);
+
+              // Transition exiting nodes to the parent's new position.
+              /*link.exit().transition()
+                  .duration(duration)
+                  .attr("d", function(d) {
+                    var o = {x: source.x, y: source.y};
+                    return diagonal({source: o, target: o});
+                  })
+                  .remove();
+            //console.log("root = " + root.x0)*/
+
+              // Stash the old positions for transition.
+              nodes.forEach(function(d) {
+                  //console.log(d.x, d.y)
+                d.x0 = d.x;
+                d.y0 = d.y;
+              });
+            //console.log("root = " + root.x0)
+        }
+
 
 		function renderOasisChart() {
 			// Organize the initital dataset
@@ -1688,6 +1832,7 @@
 		}
 
 		function resetButton() {
+            console.log("reset0")
 			admissPatientNumbers = {};
 			agePatientNumbers = {};
 			sexPatientNumbers = {};
@@ -1727,8 +1872,10 @@
 			diagnosisDim.filterAll();
 			oasisDim.filterAll();
 			tdeathDim.filterAll();
-
+            
 			updateData();
+            console.log("reset")
+            chopDownTree(); // The tree doesn't want to fall down either...
 		}
 
 		// RENDER
@@ -1743,6 +1890,7 @@
 
 			renderOasisChart();
 			renderTdeathChart();
+            renderFlowChart(root);
 		}
 
 		function renderLabels () {
@@ -1834,11 +1982,44 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-
-			parent = String(patients.length);
-			nodeNum = patients.length;
-			graph = new renderFilterGraph("#flowchart");
-			graph.addNode(parent);		
+            
+            treeData = [
+                  {
+                    "name": patients.length, 
+                    "parent": "null", 
+                    "children": [],
+                    "admissPatientNumbers": admissPatientNumbers,
+                    "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                    "admissFilterStrings": admissFilterStrings,
+                    "admissSelected": admissSelected,
+                    "agePatientNumbers": agePatientNumbers,
+                    "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                    "ageSelected": ageSelected,
+                    "ageFilterStrings": ageFilterStrings,
+                    "sexPatientNumbers": sexPatientNumbers,
+                    "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                    "sexSelected": sexSelected,
+                    "sexFilterStrings": sexFilterStrings,
+                    "mortPatientNumbers": mortPatientNumbers,
+                    "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                    "mortSelected": mortSelected,
+                    "mortFilterStrings": mortFilterStrings,
+                    "oasisPatientNumbers": oasisPatientNumbers,
+                    "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+                    "oasisSelected": oasisSelected,
+                    "oasisFilterStrings": oasisFilterStrings,
+                    "diagnosisSelected": diagnosisSelected,
+                    "diagnosisFilterStrings": diagnosisFilterStrings,
+                    "tdeathPatientNumbers": tdeathPatientNumbers,
+                    "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+              }
+            ];
+            root = treeData[0];
+            // should be root.x0 = height of flowchart/2 but using main
+            root.x0 = 300;
+            root.y0 = 300;
+			parent = root;
+	
 		}
 
 		// READ IN EXTERNAL FILES

@@ -314,14 +314,9 @@
         var parent;
         var treeData = [];
         var tree = d3.layout.tree()
-	        //.size([300, 912]);
+	        .size([300, 912]);
         var diagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.y, d.x]; });
-        //root = treeData[0];
-        // should be root.x0 = height of flowchart/2 but using main
-        //root.x0 = 200;
-        //root.y0 = 150;
-        //d3.select(self.frameElement).style( "topChartWidth", "500px");
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -334,7 +329,7 @@
             .attr("width", 912)
 	        .attr("height", 300)
             .append("g")
-	        .attr("transform", "translate(" + 75 + "," + 150 + ")");
+	        .attr("transform", "translate(" + 50 + "," + 0 + ")");
   
 		var admissChartWrapper = admissChart.append('g');
 		var ageChartWrapper = ageChart.append('g');

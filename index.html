@@ -302,6 +302,7 @@
 		var bottomChartInnerHeight = bottomChartHeight-chartMargin.top-chartMargin.bottom;
 
 		// VARABLE DECLARATIONS
+        var searchFlag = 0;
 		var icd9;
 		var patients;
 		var cf;
@@ -781,7 +782,7 @@
             //adds a new node to the tree
             console.log(currNode.name)
             console.log("new Node = " + newNode)
-            if (newNode <= 0) { 
+            if (newNode < 0) { 
                 console.log("cohort too small") 
                 return
             }
@@ -1002,6 +1003,10 @@
 			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers);
             var newParent;
             var newNodeName;
+            if (searchFlag == 1){
+                searchFlag = 0;
+                return;
+            }
 			newNodeName = patientTotal
             newParent = createTreeNode(parent, newNodeName);
             //removed creation of second node for the time being
@@ -1828,6 +1833,7 @@
 		// BUTTONS
 
 		function searchButton() {
+            searchFlag = 1;
 			updateData();
 		}
 

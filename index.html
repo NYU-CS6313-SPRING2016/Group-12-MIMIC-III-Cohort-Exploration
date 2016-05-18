@@ -330,12 +330,11 @@
 		var oasisChart = d3.select("#oasischart");
 		var tdeathChart = d3.select("#tdeathchart");
         var flowChart = d3.select("#flowchart")
-            //.attr("width", width + margin.right + margin.left)
-	        //.attr("height", height + margin.top + margin.bottom)
-            //.append("g")
-	        .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
-        
-
+            .attr("width", 912)
+	        .attr("height", 300)
+            .append("g")
+	        .attr("transform", "translate(" + 75 + "," + 150 + ")");
+  
 		var admissChartWrapper = admissChart.append('g');
 		var ageChartWrapper = ageChart.append('g');
 		var sexChartWrapper = sexChart.append('g');
@@ -920,8 +919,8 @@
               }
             ];
             root = treeData[0];
-            root.x0 = 150;
-            root.y0 = 0;
+            root.x0 = 300;
+            root.y0 = 300;
             parent = root;
             renderFlowChart(root);
         }
@@ -1433,7 +1432,7 @@
                   .style("fill-opacity", 1);
 
               // Transition exiting nodes to the parent's new position.
-              var nodeExit = node.exit().transition()
+              /*var nodeExit = node.exit().transition()
                   .duration(duration)
                   .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
                   .remove();
@@ -1442,7 +1441,7 @@
                   .attr("r", 1e-6);
 
               nodeExit.select("text")
-                  .style("fill-opacity", 1e-6);
+                  .style("fill-opacity", 1e-6);*/
 
               // Update the links…
               var link = flowChart.selectAll("path.link")
@@ -1462,14 +1461,14 @@
                   .attr("d", diagonal);
 
               // Transition exiting nodes to the parent's new position.
-              link.exit().transition()
+              /*link.exit().transition()
                   .duration(duration)
                   .attr("d", function(d) {
                     var o = {x: source.x, y: source.y};
                     return diagonal({source: o, target: o});
                   })
                   .remove();
-            //console.log("root = " + root.x0)
+            //console.log("root = " + root.x0)*/
 
               // Stash the old positions for transition.
               nodes.forEach(function(d) {
@@ -2017,8 +2016,8 @@
             ];
             root = treeData[0];
             // should be root.x0 = height of flowchart/2 but using main
-            root.x0 = 200;
-            root.y0 = 150;
+            root.x0 = 300;
+            root.y0 = 300;
 			parent = root;
 	
 		}

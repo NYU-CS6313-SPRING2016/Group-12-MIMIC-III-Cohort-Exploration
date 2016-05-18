@@ -310,29 +310,17 @@
         var i = 0,
 	       duration = 750,
 	       root;
-        
-        var treeData = [
-          {
-            "name": 61530,
-            "parent": "null",
-            "children": [],
-            "filter": 'something'
-          }
-        ];
+        var parent;
+        var treeData = [];
         var tree = d3.layout.tree()
 	        //.size([300, 912]);
         var diagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.y, d.x]; });
-        root = treeData[0];
+        /*root = treeData[0];
         // should be root.x0 = height of flowchart/2 but using main
         root.x0 = 200;
-        root.y0 = 150;
+        root.y0 = 150;*/
         //d3.select(self.frameElement).style( "topChartWidth", "500px");
-		
-		/*var nodes = [];
-		var links = [];
-		var nodeNum;
-		var parent;*/
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -792,18 +780,48 @@
         
         function createTreeNode(currNode, newNode){
             //adds a new node to the tree
-            console.log(currNode.name)
+            console.log("parent Node = " + currNode.name)
             console.log("new Node = " + newNode)
-            if (newNode <= 0) { 
+            if (newNode < 0) { 
                 console.log("cohort too small") 
                 return
             }
             var currentNode = tree.nodes(currNode)
-            var myJSONObject = {"name": newNode, "parent": currNode, "children": [], "filter": "something"};
+            var myJSONObject = {"name": newNode, 
+                                "parent": currNode, 
+                                "children": [],
+                                "admissChart": admissChart,
+                                "admissDim": admissDim,
+                                "admissKeyFunction": admissKeyFunction,
+                                "admissOrderFunction": admissOrderFunction,
+                                "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                                "admissScales": admissScales,
+                                "admissSelected": admissSelected,
+                                "ageChart": ageChart,
+                                "ageDim": ageDim,
+                                "ageKeyFunction": ageKeyFunction,
+                                "ageOrderFunction": ageOrderFunction,
+                                "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                                "ageScales": ageScales, 
+                                "ageSelected": ageSelected,
+                                "sexChart": sexChart,
+                                "sexDim": sexDim,
+                                "sexKeyFunction": sexKeyFunction,
+                                "sexOrderFunction": sexOrderFunction,
+                                "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                                "sexScales": sexScales,
+                                "sexSelected": sexSelected,
+                                "mortChart": mortChart,
+                                "mortDim": mortDim,
+                                "mortKeyFunction": mortKeyFunction,
+                                "mortOrderFunction": mortOrderFunction,
+                                "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                                "mortScales": mortScales,
+                                "mortSelected": mortSelected };
             if (currentNode[0].children != null){
                 currentNode[0].children.push(myJSONObject);
                 console.log(currentNode[0].children);
-                console.log('something');
+                console.log('sibling child');
                 //source.children = source._children;
                 //source._children = null;
             }
@@ -812,7 +830,7 @@
                 currentNode[0].children = []
                 currentNode[0].children.push(myJSONObject);
                 console.log(currentNode[0].children);
-                console.log('look');
+                console.log('first child');
             }
 
             tree.links(currentNode).push(currentNode[currentNode.length - 1]);
@@ -821,9 +839,10 @@
             return(myJSONObject);
         }
         
-        function previousFilter(){
+        function previousFilter(currNode){
             //returns the graphs to a previous filtering step
-            /*updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+            /*updateData Function
+            updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
 			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
 			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
 			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
@@ -833,7 +852,18 @@
 			updateOasisChart();
 			updateTdeathChart();
 
-			updateFlowChart();*/
+			updateFlowChart();
+            */
+            parent = currNode;
+            var currentNode = tree.nodes(currNode)
+            updateTopChart(currentNode[0].admissChart, currentNode[0].admissDim, currentNode[0].admissKeyFunction, currentNode[0].admissOrderFunction, currentNode[0].admissSelectedPatientNumbers, currentNode[0].admissScales, currentNode[0].admissSelected);
+			updateTopChart(currentNode[0].ageChart, currentNode[0].ageDim, currentNode[0].ageKeyFunction, currentNode[0].ageOrderFunction, currentNode[0].ageSelectedPatientNumbers, currentNode[0].ageScales, currentNode[0].ageSelected);
+			updateTopChart(currentNode[0].sexChart, currentNode[0].sexDim, currentNode[0].sexKeyFunction, currentNode[0].sexOrderFunction, currentNode[0].sexSelectedPatientNumbers, currentNode[0].sexScales, currentNode[0].sexSelected);
+			updateTopChart(currentNode[0].mortChart, currentNode[0].mortDim, currentNode[0].mortKeyFunction, currentNode[0].mortOrderFunction, currentNode[0].mortSelectedPatientNumbers, currentNode[0].mortScales, currentNode[0].mortSelected);
+            updateDiagnosisList();
+            updateOasisChart();
+			updateTdeathChart();
+            
             
             
         }
@@ -845,10 +875,37 @@
             flowChart.selectAll('path.link').remove();
             treeData = [
                   {
-                    "name": 61530,
-                    "parent": "null",
+                    "name": patients.length, 
+                    "parent": "null", 
                     "children": [],
-                    "filter": 'something'
+                    "admissChart": admissChart,
+                    "admissDim": admissDim,
+                    "admissKeyFunction": admissKeyFunction,
+                    "admissOrderFunction": admissOrderFunction,
+                    "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                    "admissScales": admissScales,
+                    "admissSelected": admissSelected,
+                    "ageChart": ageChart,
+                    "ageDim": ageDim,
+                    "ageKeyFunction": ageKeyFunction,
+                    "ageOrderFunction": ageOrderFunction,
+                    "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                    "ageScales": ageScales, 
+                    "ageSelected": ageSelected,
+                    "sexChart": sexChart,
+                    "sexDim": sexDim,
+                    "sexKeyFunction": sexKeyFunction,
+                    "sexOrderFunction": sexOrderFunction,
+                    "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                    "sexScales": sexScales,
+                    "sexSelected": sexSelected,
+                    "mortChart": mortChart,
+                    "mortDim": mortDim,
+                    "mortKeyFunction": mortKeyFunction,
+                    "mortOrderFunction": mortOrderFunction,
+                    "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                    "mortScales": mortScales,
+                    "mortSelected": mortSelected
                   }
             ];
             root = treeData[0];
@@ -1310,7 +1367,7 @@
               var nodeEnter = node.enter().append("g")
                   .attr("class", "node")
                   .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-                  .on("click", previousFilter())
+                  .on("click", previousFilter(this))
                   .on("mouseenter", function(d,i) { 
 						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
 						var g = d3.select(this); // The node
@@ -1329,7 +1386,7 @@
 					});
                   
               var sizeScale = d3.scale.linear()
-					.range([10,1800])
+					.range([1,1500])
 					.domain([0, patients.length]);
 
               nodeEnter.append("circle")
@@ -1908,11 +1965,48 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-
-			parent = root;
+            
+            treeData = [
+              {
+                "name": patients.length, 
+                "parent": "null", 
+                "children": [],
+                "admissChart": admissChart,
+                "admissDim": admissDim,
+                "admissKeyFunction": admissKeyFunction,
+                "admissOrderFunction": admissOrderFunction,
+                "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                "admissScales": admissScales,
+                "admissSelected": admissSelected,
+                "ageChart": ageChart,
+                "ageDim": ageDim,
+                "ageKeyFunction": ageKeyFunction,
+                "ageOrderFunction": ageOrderFunction,
+                "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                "ageScales": ageScales, 
+                "ageSelected": ageSelected,
+                "sexChart": sexChart,
+                "sexDim": sexDim,
+                "sexKeyFunction": sexKeyFunction,
+                "sexOrderFunction": sexOrderFunction,
+                "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                "sexScales": sexScales,
+                "sexSelected": sexSelected,
+                "mortChart": mortChart,
+                "mortDim": mortDim,
+                "mortKeyFunction": mortKeyFunction,
+                "mortOrderFunction": mortOrderFunction,
+                "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                "mortScales": mortScales,
+                "mortSelected": mortSelected
+              }
+            ];
+            root = treeData[0];
+            root.x0 = 200;
+            root.y0 = 150;
+            parent = root;
+            
             renderFlowChart(root);
-			//graph = new renderFlowChart("#flowchart");
-			//graph.addNode(parent);		
 		}
 
 		// READ IN EXTERNAL FILES

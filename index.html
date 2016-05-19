@@ -3,8 +3,10 @@
 		<title>MIMIC-III Cohort Exploration</title>
 		<style>
 			body {
-				background-color: lightblue;
-				font-family: sans-serif;
+				background-color: #82a3c9; //lightblue;
+				//font-family: sans-serif;
+                //font-family: serif;
+                font-family: "Times New Roman", Times, serif;
 			}
 
 			/*HEADER*/
@@ -32,24 +34,28 @@
 				text-decoration: none;
 				text-align: center;
 				text-transform: uppercase;
-				font-size: 2em;
-				font-weight: 500;
+				font-size: 2.5em;
+				font-weight: 800;
 				color: #323338;
 				padding-top: 30px;
+                text-decoration: underline;
 			}
 
 			.vis {
 				margin: auto;
-				background-color: white;
-				width: 1224px;
-				height: 620px;
+				background-color: none;
+				width: 1250px;
+				height: 700px;
 			}
 
 			.chartarea {
 				display: inline;
 				float: left;
 				margin: 2px;
-				border: solid 1px gray;
+				border: solid 1.5px black;
+                background-color: white;
+                opacity: 0.8;
+                border-radius: 8px;
 			}
 			.chart-title {
 				border-bottom: 1px solid #d7d7d7;
@@ -74,21 +80,23 @@
 
 			.topchart {
 				width: 300px;
-				height: 125px;
+				height: 200px;
 			}
 			#diagnosislistchartarea {
 				width: 300px;
-				height: 457px;
-				overflow-x:scroll;
-				overflow-y:scroll;
+				height: 453px;
+				//overflow-x:scroll;
+				//overflow-y:scroll;
+                overflow-x: none;
+				overflow-y: none;
 			}
 			.mainchart {
 				width: 912px;
-				height: 300px;
+				height: 220px;
 			}
 			.bottomchart {
 				width: 453px;
-				height: 125px;
+				height: 200px;
 			}
 
 			.topchart rect {
@@ -108,7 +116,8 @@
 			}
 
 			#scrolldiv {
-				height: 374px;
+				//height: 374px;
+                height: 374px;
 				width: 100%;
 				overflow-x:none;
 				overflow-y:scroll;
@@ -164,8 +173,9 @@
 
 			.axislabel {
 				text-anchor: middle;
-				font-family: sans-serif;
-				font-size: 9px;
+				//font-family: sans-serif;
+				font-family: "Times New Roman", Times, serif;
+                font-size: 9px;
 				font-weight: bold;
 			}
 			.tick {
@@ -186,24 +196,69 @@
 				background-color: rgba(255,255,255,0.9);
 				padding: 5;
 				border: solid 1px black;
+                border-radius: 5px;
 				visibility: hidden;
 				transition: all 0.5s;
 			}
             
             .node circle {
-              fill: #fff;
+              fill: gray;
               stroke: steelblue;
               stroke-width: 3px;
             }
 
             .node text {
-              font: 12px sans-serif;
+              font: 16px sans-serif;
+              text-anchor: middle;
             }
 
             .link {
               fill: none;
               stroke: #ccc;
-              stroke-width: 2px;
+              stroke-width: 4px;
+            }
+            
+            /* FOOTER */
+            .footer-basic-centered{
+                //background-color: #292c2f;
+                background-color: none;
+                //box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
+                box-sizing: border-box;
+                width: 100%;
+                text-align: center;
+                font: normal 18px sans-serif;
+                //padding: 30px;
+                padding: 0;
+                margin-top: 60px;
+            }
+            
+            .footer-basic-centered .footer-company-motto{
+                //color:  #8d9093;
+                color: black;
+                font-size: 24px;
+                margin: 0;
+            }
+
+            .footer-basic-centered .footer-company-name{
+                //color:  #8f9296;
+                color: black;
+                font-size: 14px;
+                margin-top: 4;
+            }
+
+            .footer-basic-centered .footer-links{
+                list-style: none;
+                font-weight: bold;
+                //color:  #ffffff;
+                color: black;
+                padding: 0px;
+                margin: 0;
+            }
+
+            .footer-basic-centered .footer-links a{
+                display:inline-block;
+                text-decoration: none;
+                color: inherit;
             }
 		</style>
 	</head>
@@ -211,7 +266,7 @@
 		<div id="header">
 			<div class="container">
 				<div id="logo">
-					<h1>MIMIC III - Cohort Exploration</h1>
+					<h1>MIMIC-III  Cohort Exploration</h1>
 				</div>
 			</div>
 		</div>
@@ -266,14 +321,14 @@
 			<br>
 			<div class="chartarea">
 				<div class="chart-title"> 
-					<strong>OASIS Chart</strong>
+					<strong>OASIS Severity of Illness Chart</strong>
 				</div>
 				<svg class="bottomchart" id="oasischart">
 				</svg>
 			</div>
 			<div class="chartarea">
 				<div class="chart-title"> 
-					<strong>T-Death (Time-to-Death) Chart</strong>
+					<strong>Time to Death Chart</strong>
 				</div>
 				<svg class="bottomchart" id="tdeathchart">
 				</svg>
@@ -281,16 +336,30 @@
 		</div>
 		<div id="tooltip">Toolip</div>
 	</body>
+    <footer class="footer-basic-centered">
+
+			<p class="footer-company-motto"></p>
+
+			<p class="footer-links">
+				Harshan Andrews, Vincent Major
+			</p>	
+            <p class="footer-links">
+				Zbynek Stara, Frances Yu
+			</p>
+
+			<p class="footer-company-name">Created for NYU-CS6313, Information Visualization, Spring 2016</p>
+
+    </footer>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
 	<script>
 		// CONSTANTS
 		var topChartWidth = 300;
-		var topChartHeight = 150;
+		var topChartHeight = 225;
 
 		var bottomChartWidth = 453;
-		var bottomChartHeight = 150;
+		var bottomChartHeight = 225;
 
 		var chartMargin = {top:5,right:20,bottom:50,left:40};
 
@@ -315,7 +384,7 @@
         var workingNode;
         var treeData = [];
         var tree = d3.layout.tree()
-	        .size([300, 912]);
+	        .size([200, 912]);
         var diagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.y, d.x]; });
 
@@ -328,7 +397,7 @@
 		var tdeathChart = d3.select("#tdeathchart");
         var flowChart = d3.select("#flowchart")
             .attr("width", 912)
-	        .attr("height", 300)
+	        .attr("height", 200)
             .append("g")
 	        .attr("transform", "translate(" + 50 + "," + 0 + ")");
   
@@ -1140,7 +1209,7 @@
 				if (i == 0) { d.cumsum = d.yvalue; }
 				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
 
-				d.cumpercentage = (d.cumsum/selectedPatients.length);
+				d.cumpercentage = (100*d.cumsum/selectedPatients.length);
 			});
 
 			tdeathChart.select("g.fg").selectAll("circle")
@@ -1151,7 +1220,7 @@
 				.enter()
 				.append("circle")
 				.attr("r", 2)
-				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
+				.attr("cx", function(d) { return tdeathScales.xScale(d.xvalue); })
 				.attr("cy", function(d) { return tdeathScales.yScale(d.cumpercentage); });
 		}
 
@@ -1728,7 +1797,7 @@
 				if (i == 0) { d.cumsum = d.yvalue; }
 				else {d.cumsum = dataset[i-1].cumsum + d.yvalue; }
 
-				d.cumpercentage = (d.cumsum/patients.length)
+				d.cumpercentage = (100*d.cumsum/patients.length)
 			});
 			
 			// Now repeat for selected patients
@@ -1761,7 +1830,7 @@
 				if (i == 0) { d.cumsum = d.yvalue; }
 				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
 
-				d.cumpercentage = (d.cumsum/selectedPatients.length);
+				d.cumpercentage = (100*d.cumsum/selectedPatients.length);
 			});
 
 			// Define the chart
@@ -1789,12 +1858,13 @@
 			// x Domain is the ordinal d.key
 			tdeathScales.xScale = d3.scale.linear()
 				.range([0,bottomChartInnerWidth])
-				.domain([0,d3.max(dataset, function(d) { return d.xvalue; })]);
+                .domain([0,365]);
+				//.domain([0,d3.max(dataset, function(d) { return d.xvalue; })]);
 
 			// y Domain is the d.value
 			tdeathScales.yScale = d3.scale.linear()
 				.range([0, bottomChartInnerHeight])
-				.domain([0, 1]);
+				.domain([0, 100]);
 			
 			// Plot the background circles
 			backgroundDataPointGroup.selectAll("circle")
@@ -1899,79 +1969,79 @@
 		function renderLabels () {
 			//X-Axis labels
 			admissChartWrapper.append("text")
-				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 115)
+				.attr("x", chartMargin.left + 120)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("Admission Type");
 			ageChartWrapper.append("text")
-				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 115)
+				.attr("x", chartMargin.left + 120)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("Age Group");
 			sexChartWrapper.append("text")
-				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 115)
+				.attr("x", chartMargin.left + 120)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("Sex");
 			mortChartWrapper.append("text")
-				.attr("x", chartMargin.left + 100)
-				.attr("y", chartMargin.top + 115)
+				.attr("x", chartMargin.left + 120)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("Mortality Category");
 			oasisChartWrapper.append("text")
 				.attr("x", chartMargin.left + 200)
-				.attr("y", chartMargin.top + 115)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("OASIS Category");
 			tdeathChartWrapper.append("text")
 				.attr("x", chartMargin.left + 200)
-				.attr("y", chartMargin.top + 115)
+				.attr("y", chartMargin.top + 190)
 				.attr("class", "axislabel")
 				.text("Days until Death");
 
 			//Y-Axis Labels
 			admissChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -55)
+				.attr("x", -90)
 				.attr("y", 3)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Records");
+				.text("Count");
 			ageChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -55)
+				.attr("x", -90)
 				.attr("y", 3)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Records");
+				.text("Count");
 			sexChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -55)
+				.attr("x", -90)
 				.attr("y", 3)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Records");
+				.text("Count");
 			mortChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -55)
+				.attr("x", -90)
 				.attr("y", 3)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Records");
+				.text("Count");
 			oasisChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -55)
+				.attr("x", -90)
 				.attr("y", 3)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Records");
+				.text("Count");
 			tdeathChartWrapper.append("text")
 				.attr("transform", "rotate(-90)")
-				.attr("x", -50)
+				.attr("x", -90)
 				.attr("y", 10)
 				.attr("dy", "1em")
 				.attr("class", "axislabel")
-				.text("Death of Patients (%)");
+				.text("Mortality (%)");
 		}
 
 		// INITIALIZE

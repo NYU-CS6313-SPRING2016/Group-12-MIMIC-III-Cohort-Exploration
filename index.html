@@ -852,59 +852,35 @@
                 return
             }
             
-            var APN = admissPatientNumbers;
-            var ASPN = admissSelectedPatientNumbers;
-            var AFS = admissFilterStrings;
-            var AS = admissSelected;
-            var AgPN = agePatientNumbers;
-            var AgSPN = ageSelectedPatientNumbers;
-            var AgS = ageSelected;
-            var AgFS = ageFilterStrings;
-            var SPN = sexPatientNumbers;
-            var SSPN = sexSelectedPatientNumbers;
-            var SS = sexSelected;
-            var SFS = sexFilterStrings;
-            var MPN = mortPatientNumbers;
-            var MSPN = mortSelectedPatientNumbers;
-            var MS = mortSelected;
-            var MFS = mortFilterStrings;
-            var OPN = oasisPatientNumbers;
-            var OSPN = oasisSelectedPatientNumbers
-            var OS = oasisSelected;
-            var OFS = oasisFilterStrings;
-            var DS = diagnosisSelected;
-            var DFS = diagnosisFilterStrings;
-            var TDPN = tdeathPatientNumbers;
-            var TDSPN = tdeathSelectedPatientNumbers;
             var currentNode = tree.nodes(currNode)
             var myJSONObject = {
                 "name": newNode, 
                 "parent": currNode, 
                 "children": [],                 
-                "admissPatientNumbers": APN,
-                "admissSelectedPatientNumbers": ASPN,
-                "admissFilterStrings": AFS,
-                "admissSelected": AS,
-                "agePatientNumbers": AgPN,
-                "ageSelectedPatientNumbers": AgSPN,
-                "ageSelected": AgS,
-                "ageFilterStrings": AgFS,
-                "sexPatientNumbers": SPN,
-                "sexSelectedPatientNumbers": SSPN,
-                "sexSelected": SS,
-                "sexFilterStrings": SFS,
-                "mortPatientNumbers": MPN,
-                "mortSelectedPatientNumbers": MSPN,
-                "mortSelected": MS,
-                "mortFilterStrings": MFS,
-                "oasisPatientNumbers": OPN,
-                "oasisSelectedPatientNumbers": OSPN,
-                "oasisSelected": OS,
-                "oasisFilterStrings": OFS,
-                "diagnosisSelected": DS,
-                "diagnosisFilterStrings": DFS,
-                "tdeathPatientNumbers": TDPN,
-                "tdeathSelectedPatientNumbers": TDSPN
+                "admissPatientNumbers": admissPatientNumbers,
+                "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                "admissFilterStrings": admissFilterStrings,
+                "admissSelected": admissSelected,
+                "agePatientNumbers": agePatientNumbers,
+                "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                "ageSelected": ageSelected,
+                "ageFilterStrings": ageFilterStrings,
+                "sexPatientNumbers": sexPatientNumbers,
+                "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                "sexSelected": sexSelected,
+                "sexFilterStrings": sexFilterStrings,
+                "mortPatientNumbers": mortPatientNumbers,
+                "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                "mortSelected": mortSelected,
+                "mortFilterStrings": mortFilterStrings,
+                "oasisPatientNumbers": oasisPatientNumbers,
+                "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+                "oasisSelected": oasisSelected,
+                "oasisFilterStrings": oasisFilterStrings,
+                "diagnosisSelected": diagnosisSelected,
+                "diagnosisFilterStrings": diagnosisFilterStrings,
+                "tdeathPatientNumbers": tdeathPatientNumbers,
+                "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
             };
             if (currentNode[0].children != null){
                 currentNode[0].children.push(myJSONObject);
@@ -2055,59 +2031,35 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-            var APN = admissPatientNumbers;
-            var ASPN = admissSelectedPatientNumbers;
-            var AFS = admissFilterStrings;
-            var AS = admissSelected;
-            var AgPN = agePatientNumbers;
-            var AgSPN = ageSelectedPatientNumbers;
-            var AgS = ageSelected;
-            var AgFS = ageFilterStrings;
-            var SPN = sexPatientNumbers;
-            var SSPN = sexSelectedPatientNumbers;
-            var SS = sexSelected;
-            var SFS = sexFilterStrings;
-            var MPN = mortPatientNumbers;
-            var MSPN = mortSelectedPatientNumbers;
-            var MS = mortSelected;
-            var MFS = mortFilterStrings;
-            var OPN = oasisPatientNumbers;
-            var OSPN = oasisSelectedPatientNumbers
-            var OS = oasisSelected;
-            var OFS = oasisFilterStrings;
-            var DS = diagnosisSelected;
-            var DFS = diagnosisFilterStrings;
-            var TDPN = tdeathPatientNumbers;
-            var TDSPN = tdeathSelectedPatientNumbers;
             treeData = [
                   {
                     "name": patients.length, 
                     "parent": "null", 
                     "children": [],
-                    "admissPatientNumbers": APN,
-                    "admissSelectedPatientNumbers": ASPN,
-                    "admissFilterStrings": AFS,
-                    "admissSelected": AS,
-                    "agePatientNumbers": AgPN,
-                    "ageSelectedPatientNumbers": AgSPN,
-                    "ageSelected": AgS,
-                    "ageFilterStrings": AgFS,
-                    "sexPatientNumbers": SPN,
-                    "sexSelectedPatientNumbers": SSPN,
-                    "sexSelected": SS,
-                    "sexFilterStrings": SFS,
-                    "mortPatientNumbers": MPN,
-                    "mortSelectedPatientNumbers": MSPN,
-                    "mortSelected": MS,
-                    "mortFilterStrings": MFS,
-                    "oasisPatientNumbers": OPN,
-                    "oasisSelectedPatientNumbers": OSPN,
-                    "oasisSelected": OS,
-                    "oasisFilterStrings": OFS,
-                    "diagnosisSelected": DS,
-                    "diagnosisFilterStrings": DFS,
-                    "tdeathPatientNumbers": TDPN,
-                    "tdeathSelectedPatientNumbers": TDSPN
+                    "admissPatientNumbers": admissPatientNumbers,
+                    "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+                    "admissFilterStrings": admissFilterStrings,
+                    "admissSelected": admissSelected,
+                    "agePatientNumbers": agePatientNumbers,
+                    "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+                    "ageSelected": ageSelected,
+                    "ageFilterStrings": ageFilterStrings,
+                    "sexPatientNumbers": sexPatientNumbers,
+                    "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+                    "sexSelected": sexSelected,
+                    "sexFilterStrings": sexFilterStrings,
+                    "mortPatientNumbers": mortPatientNumbers,
+                    "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+                    "mortSelected": mortSelected,
+                    "mortFilterStrings": mortFilterStrings,
+                    "oasisPatientNumbers": oasisPatientNumbers,
+                    "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+                    "oasisSelected": oasisSelected,
+                    "oasisFilterStrings": oasisFilterStrings,
+                    "diagnosisSelected": diagnosisSelected,
+                    "diagnosisFilterStrings": diagnosisFilterStrings,
+                    "tdeathPatientNumbers": tdeathPatientNumbers,
+                    "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
                   }
             ];
             root = treeData[0];

@@ -381,6 +381,7 @@
 	       duration = 750,
 	       root;
         var parent;
+        var workingNode;
         var treeData = [];
         var tree = d3.layout.tree()
 	        .size([200, 912]);
@@ -844,12 +845,13 @@
         
         function createTreeNode(currNode, newNode){
             //adds a new node to the tree
-            console.log(currNode.name)
-            console.log("new Node = " + newNode)
+            //console.log(currNode.name)
+            //console.log("new Node = " + newNode)
             if (newNode < 0) { 
                 console.log("cohort too small") 
                 return
             }
+            
             var currentNode = tree.nodes(currNode)
             var myJSONObject = {
                 "name": newNode, 
@@ -882,8 +884,8 @@
             };
             if (currentNode[0].children != null){
                 currentNode[0].children.push(myJSONObject);
-                console.log(currentNode[0].children);
-                console.log('sibling children');
+                //console.log(currentNode[0].children);
+                //console.log('sibling children');
                 //source.children = source._children;
                 //source._children = null;
             }
@@ -891,22 +893,23 @@
             else{
                 currentNode[0].children = []
                 currentNode[0].children.push(myJSONObject);
-                console.log(currentNode[0].children);
-                console.log('first child');
+                //console.log(currentNode[0].children);
+                //console.log('first child');
             }
 
             tree.links(currentNode).push(currentNode[currentNode.length - 1]);
 
-            renderFlowChart(currNode);
             return(myJSONObject);
         }
         
         function previousFilter(currNode){
             //returns the graphs to a previous filtering step
+            //properties of the admiss,age, sex, mort, oasis, and tdeath in the treeData object seem to change after each filter step. Why?
             console.log("returning to a previous filter")
-            //console.log(currNode)
-            //console.log("filter at Node: " + currNode.name)
+            console.log(currNode)
+            console.log("filter at Node: " + currNode.name + ', ' + currNode.id)
             parent = currNode;
+            workingNode = currNode;
             //var currentNode = tree.nodes(currNode)
             
             admissPatientNumbers = currNode.admissPatientNumbers
@@ -945,6 +948,7 @@
             updateOasisChart();
 			updateTdeathChart();
             
+            renderFlowChart(currNode);
         }
         
         function chopDownTree(){
@@ -987,6 +991,7 @@
             root.x0 = 300;
             root.y0 = 300;
             parent = root;
+            workingNode = root;
             renderFlowChart(root);
         }
         
@@ -1073,12 +1078,8 @@
             }
 			newNodeName = patientTotal
             newParent = createTreeNode(parent, newNodeName);
-            //removed creation of second node for the time being
-            //console.log(newNodeName)
-            //console.log("parNode = " + parent.name)
-            //newNodeName = parent.name - newNodeName;
-            //console.log(newNodeName)
-            //createTreeNode(parent, newNodeName);
+            workingNode = newParent;
+            renderFlowChart(parent);
             parent = newParent;
 		}
 		
@@ -1429,12 +1430,9 @@
 		function renderFlowChart(source) {
             // Modified from http://www.d3noob.org/2014/01/tree-diagrams-in-d3js_11.html
             // and http://codesanswer.com/question/84585-d3-js-how-to-dynamically-add-nodes-to-a-tree
-            // Now the tree doesn't want to move out of the top portion of the chart...
 			 // Compute the new tree layout.
-            //console.log("root = " + root.x0)
               var nodes = tree.nodes(root).reverse(),
                   links = tree.links(nodes);
-            console.log("root = " + root.x0)
 
               // Normalize for fixed-depth.
               nodes.forEach(function(d) { d.y = d.depth * 180; });
@@ -1455,62 +1453,54 @@
 							.classed('info', true)
 							.attr('x', 20)
 							.attr('y', 10)
-							.text(function(d) {return d.name});
-						
+							.text(function(d) {return d.name});						
 				    })
 					.on("mouseleave", function(d,i) {
 						// Remove the info text on mouse out.
 						d3.select(this).select('text.info').remove();
 						
 					})
-                //.on("click", previousFilter(d3.select(this)));
-                .on("click", function(d,i){
-                   var currNode = d;
-                    console.log(currNode)
-                    previousFilter(currNode);
+                    .on("click", function(d,i){
+                        var currNode = d;
+                        console.log(currNode)
+                        previousFilter(currNode);
                 });
                   
               var sizeScale = d3.scale.linear()
-					.range([10,1800])
+					.range([1,1800])
 					.domain([0, patients.length]);
 
               nodeEnter.append("circle")
                   .attr("r", 1e-6)
-                  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+                  .style('fill', function(d){
+                            if (d.id == workingNode.id){
+                                return 'orange'; }});
 
-              nodeEnter.append("text")
+              /*nodeEnter.append("text")
                   .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
                   .attr("dy", ".35em")
                   .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
                   .text(function(d) { return d.name; })
-                  .style("fill-opacity", 1e-6);
+                  .style("fill-opacity", 1e-6);*/
 
               // Transition nodes to their new position.
               var nodeUpdate = node.transition()
                   .duration(duration)
                   .attr("transform", function(d) { 
-                      //console.log(d.x, d.y)
                       return "translate(" + d.y + "," + d.x + ")"; });
             
 
               nodeUpdate.select("circle")
-                  .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
-                  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+                    .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
+                    .style('fill', function(d){
+                            if (d.id == workingNode.id){
+                                return 'orange';
+                            }
+              })
+                  //.style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
-
-              // Transition exiting nodes to the parent's new position.
-              /*var nodeExit = node.exit().transition()
-                  .duration(duration)
-                  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-                  .remove();
-
-              nodeExit.select("circle")
-                  .attr("r", 1e-6);
-
-              nodeExit.select("text")
-                  .style("fill-opacity", 1e-6);*/
 
               // Update the links…
               var link = flowChart.selectAll("path.link")
@@ -1529,23 +1519,11 @@
                   .duration(duration)
                   .attr("d", diagonal);
 
-              // Transition exiting nodes to the parent's new position.
-              /*link.exit().transition()
-                  .duration(duration)
-                  .attr("d", function(d) {
-                    var o = {x: source.x, y: source.y};
-                    return diagonal({source: o, target: o});
-                  })
-                  .remove();
-            //console.log("root = " + root.x0)*/
-
               // Stash the old positions for transition.
               nodes.forEach(function(d) {
-                  //console.log(d.x, d.y)
                 d.x0 = d.x;
                 d.y0 = d.y;
               });
-            //console.log("root = " + root.x0)
         }
 
 
@@ -2053,7 +2031,6 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-            
             treeData = [
                   {
                     "name": patients.length, 
@@ -2083,13 +2060,14 @@
                     "diagnosisFilterStrings": diagnosisFilterStrings,
                     "tdeathPatientNumbers": tdeathPatientNumbers,
                     "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
-              }
+                  }
             ];
             root = treeData[0];
             // should be root.x0 = height of flowchart/2 but using main
             root.x0 = 300;
             root.y0 = 300;
 			parent = root;
+            workingNode = root;
 	
 		}
 

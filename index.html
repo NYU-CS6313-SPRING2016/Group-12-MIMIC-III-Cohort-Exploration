@@ -3,10 +3,8 @@
 		<title>MIMIC-III Cohort Exploration</title>
 		<style>
 			body {
-				background-color: #82a3c9; //lightblue;
-				//font-family: sans-serif;
-                //font-family: serif;
-                font-family: "Times New Roman", Times, serif;
+				background-color: #82a3c9;
+				font-family: "Times New Roman", Times, serif;
 			}
 
 			/*HEADER*/
@@ -38,7 +36,7 @@
 				font-weight: 800;
 				color: #323338;
 				padding-top: 30px;
-                text-decoration: underline;
+				text-decoration: underline;
 			}
 
 			.vis {
@@ -53,9 +51,9 @@
 				float: left;
 				margin: 2px;
 				border: solid 1.5px black;
-                background-color: white;
-                opacity: 0.8;
-                border-radius: 8px;
+				background-color: white;
+				opacity: 0.8;
+				border-radius: 8px;
 			}
 			.chart-title {
 				border-bottom: 1px solid #d7d7d7;
@@ -85,10 +83,6 @@
 			#diagnosislistchartarea {
 				width: 300px;
 				height: 453px;
-				//overflow-x:scroll;
-				//overflow-y:scroll;
-                overflow-x: none;
-				overflow-y: none;
 			}
 			.mainchart {
 				width: 912px;
@@ -116,7 +110,7 @@
 			}
 
 			#scrolldiv {
-                		height: 374px;
+				height: 369px;
 				width: 100%;
 				overflow-x:none;
 				overflow-y:scroll;
@@ -172,9 +166,8 @@
 
 			.axislabel {
 				text-anchor: middle;
-				//font-family: sans-serif;
 				font-family: "Times New Roman", Times, serif;
-                font-size: 9px;
+				font-size: 9px;
 				font-weight: bold;
 			}
 			.tick {
@@ -195,70 +188,136 @@
 				background-color: rgba(255,255,255,0.9);
 				padding: 5;
 				border: solid 1px black;
-                border-radius: 5px;
+				border-radius: 5px;
 				visibility: hidden;
 				transition: all 0.5s;
 			}
-            
-            .node circle {
-              fill: gray;
-              stroke: steelblue;
-              stroke-width: 3px;
-            }
+			
+			.node circle {
+				fill: gray;
+				stroke: steelblue;
+				stroke-width: 3px;
+			}
 
-            .node text {
-              font: 16px sans-serif;
-              text-anchor: middle;
-            }
+			.node text {
+				font: 16px sans-serif;
+				text-anchor: middle;
+			}
 
-            .link {
-              fill: none;
-              stroke: #ccc;
-              stroke-width: 4px;
-            }
-            
-            /* FOOTER */
-            .footer-basic-centered{
-                //background-color: #292c2f;
-                background-color: none;
-                //box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
-                box-sizing: border-box;
-                width: 100%;
-                text-align: center;
-                font: normal 18px sans-serif;
-                //padding: 30px;
-                padding: 0;
-                margin-top: 60px;
-            }
-            
-            .footer-basic-centered .footer-company-motto{
-                //color:  #8d9093;
-                color: black;
-                font-size: 24px;
-                margin: 0;
-            }
+			.link {
+				fill: none;
+				stroke: #ccc;
+				stroke-width: 4px;
+			}
+			
+			/* FOOTER */
+			.footer-basic-centered{
+				background-color: none;
+				box-sizing: border-box;
+				width: 100%;
+				text-align: center;
+				font: normal 18px sans-serif;
+				padding: 0;
+				margin-top: 60px;
+			}
 
-            .footer-basic-centered .footer-company-name{
-                //color:  #8f9296;
-                color: black;
-                font-size: 14px;
-                margin-top: 4;
-            }
+			.footer-basic-centered .footer-desc{
+				color: black;
+				font-size: 14px;
+				margin-top: 4;
+			}
 
-            .footer-basic-centered .footer-links{
-                list-style: none;
-                font-weight: bold;
-                //color:  #ffffff;
-                color: black;
-                padding: 0px;
-                margin: 0;
-            }
+			.footer-basic-centered .footer-names{
+				list-style: none;
+				font-weight: bold;
+				color: black;
+				padding: 0px;
+				margin: 0;
+			}
 
-            .footer-basic-centered .footer-links a{
-                display:inline-block;
-                text-decoration: none;
-                color: inherit;
-            }
+			#loading {
+				position: fixed;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(255,255,255,0.9);
+				display: table;
+				height: 100%;
+				width: 100%;
+			}
+
+			.loaderdiv {
+				display: table-cell;
+				vertical-align: middle;
+				margin: auto;
+			}
+			.loadertext {
+				text-align: center;
+			}
+			.loader {
+				margin-left: auto;
+				margin-right: auto; 
+				font-size: 10px;
+				position: relative;
+				text-indent: -9999em;
+				border-top: 1.1em solid rgba(100, 149, 237, 0.2);
+				border-right: 1.1em solid rgba(100, 149, 237, 0.2);
+				border-bottom: 1.1em solid rgba(100, 149, 237, 0.2);
+				border-left: 1.1em solid cornflowerblue;
+				-webkit-transform: translateZ(0);
+				-ms-transform: translateZ(0);
+				transform: translateZ(0);
+				-webkit-animation: load8 1.1s infinite linear;
+				animation: load8 1.1s infinite linear;
+			}
+			.loader,
+			.loader:after {
+				border-radius: 50%;
+				width: 10em;
+				height: 10em;
+			}
+			@-webkit-keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+			@keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+
+			#error {
+				position: fixed;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(255,255,255,0.9);
+				display: table;
+				height: 100%;
+				width: 100%;
+				visibility: hidden;
+			}
+			.errordiv {
+				display: table-cell;
+				vertical-align: middle;
+				margin: auto;
+			}
+			.errortext {
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>
@@ -336,22 +395,18 @@
 				</svg>
 			</div>
 		</div>
-		<div id="tooltip">Toolip</div>
+		<div id="loading">
+			<div class="loaderdiv"><div class="loader"></div><br><div class="loadertext">Loading...</div></div>
+		</div>
+		<div id="error">
+			<div class="errordiv"><div class="errortext">Error loading data - please refresh page</div></div>
+		</div>
+		<div id="tooltip"></div>
 	</body>
-    <footer class="footer-basic-centered">
-
-			<p class="footer-company-motto"></p>
-
-			<p class="footer-links">
-				Harshan Andrews, Vincent Major
-			</p>	
-            <p class="footer-links">
-				Zbynek Stara, Frances Yu
-			</p>
-
-			<p class="footer-company-name">Created for NYU-CS6313, Information Visualization, Spring 2016</p>
-
-    </footer>
+	<footer class="footer-basic-centered">
+		<p class="footer-names">Harshan Andrews, Vincent Major, Zbynek Stara, Frances Yu</p>
+		<p class="footer-desc">Created for NYU-CS6313, Information Visualization, Spring 2016</p>
+	</footer>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
@@ -373,22 +428,22 @@
 		var bottomChartInnerHeight = bottomChartHeight-chartMargin.top-chartMargin.bottom;
 
 		// VARABLE DECLARATIONS
-        var searchFlag = 0;
+		var searchFlag = 0;
 		var icd9;
 		var patients;
 		var cf;
-        
-        //Tree Setup and variables
-        var i = 0,
-	       duration = 750,
-	       root;
-        var parent;
-        var workingNode;
-        var treeData = [];
-        var tree = d3.layout.tree()
-	        .size([200, 912]);
-        var diagonal = d3.svg.diagonal()
-            .projection(function(d) { return [d.y, d.x]; });
+		
+		//Tree Setup and variables
+		var i = 0,
+		   duration = 750,
+		   root;
+		var parent;
+		var workingNode;
+		var treeData = [];
+		var tree = d3.layout.tree()
+			.size([200, 912]);
+		var diagonal = d3.svg.diagonal()
+			.projection(function(d) { return [d.y, d.x]; });
 
 		var admissChart = d3.select("#admisschart");
 		var ageChart = d3.select("#agechart");
@@ -397,11 +452,11 @@
 		var diagnosisList = d3.select("#diagnosislist");
 		var oasisChart = d3.select("#oasischart");
 		var tdeathChart = d3.select("#tdeathchart");
-        var flowChart = d3.select("#flowchart")
-            .attr("width", 912)
-	        .attr("height", 200)
-            .append("g")
-	        .attr("transform", "translate(" + 50 + "," + 0 + ")");
+		var flowChart = d3.select("#flowchart")
+			.attr("width", 912)
+			.attr("height", 200)
+			.append("g")
+			.attr("transform", "translate(" + 50 + "," + 0 + ")");
   
 		var admissChartWrapper = admissChart.append('g');
 		var ageChartWrapper = ageChart.append('g');
@@ -836,85 +891,85 @@
 		}    
 		
 		function cohortPatientTotal(obj) {
-            var sum = 0;
-            for (var el in obj)
-                {
-                    if(obj.hasOwnProperty( el ))
-                    { sum += obj[el] } 
-                }
-            return sum;
+			var sum = 0;
+			for (var el in obj)
+				{
+					if(obj.hasOwnProperty( el ))
+					{ sum += obj[el] } 
+				}
+			return sum;
 		}
-        
-        function createTreeNode(currNode, newNode){
-            //adds a new node to the tree
-            //console.log(currNode.name)
-            //console.log("new Node = " + newNode)
-            if (newNode < 0) { 
-                console.log("cohort too small") 
-                return
-            }
-            
-            var currentNode = tree.nodes(currNode)
-            var myJSONObject = {
-                "name": newNode, 
-                "parent": currNode, 
-                "children": [],                 
-                "admissPatientNumbers": admissPatientNumbers,
-                "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
-                "admissFilterStrings": admissFilterStrings,
-                "admissSelected": admissSelected,
-                "agePatientNumbers": agePatientNumbers,
-                "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
-                "ageSelected": ageSelected,
-                "ageFilterStrings": ageFilterStrings,
-                "sexPatientNumbers": sexPatientNumbers,
-                "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
-                "sexSelected": sexSelected,
-                "sexFilterStrings": sexFilterStrings,
-                "mortPatientNumbers": mortPatientNumbers,
-                "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
-                "mortSelected": mortSelected,
-                "mortFilterStrings": mortFilterStrings,
-                "oasisPatientNumbers": oasisPatientNumbers,
-                "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
-                "oasisSelected": oasisSelected,
-                "oasisFilterStrings": oasisFilterStrings,
-                "diagnosisSelected": diagnosisSelected,
-                "diagnosisFilterStrings": diagnosisFilterStrings,
-                "tdeathPatientNumbers": tdeathPatientNumbers,
-                "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
-            };
-            if (currentNode[0].children != null){
-                currentNode[0].children.push(myJSONObject);
-                //console.log(currentNode[0].children);
-                //console.log('sibling children');
-                //source.children = source._children;
-                //source._children = null;
-            }
+		
+		function createTreeNode(currNode, newNode){
+			//adds a new node to the tree
+			//console.log(currNode.name)
+			//console.log("new Node = " + newNode)
+			if (newNode < 0) { 
+				console.log("cohort too small") 
+				return
+			}
+			
+			var currentNode = tree.nodes(currNode)
+			var myJSONObject = {
+				"name": newNode, 
+				"parent": currNode, 
+				"children": [],                 
+				"admissPatientNumbers": admissPatientNumbers,
+				"admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+				"admissFilterStrings": admissFilterStrings,
+				"admissSelected": admissSelected,
+				"agePatientNumbers": agePatientNumbers,
+				"ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+				"ageSelected": ageSelected,
+				"ageFilterStrings": ageFilterStrings,
+				"sexPatientNumbers": sexPatientNumbers,
+				"sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+				"sexSelected": sexSelected,
+				"sexFilterStrings": sexFilterStrings,
+				"mortPatientNumbers": mortPatientNumbers,
+				"mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+				"mortSelected": mortSelected,
+				"mortFilterStrings": mortFilterStrings,
+				"oasisPatientNumbers": oasisPatientNumbers,
+				"oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+				"oasisSelected": oasisSelected,
+				"oasisFilterStrings": oasisFilterStrings,
+				"diagnosisSelected": diagnosisSelected,
+				"diagnosisFilterStrings": diagnosisFilterStrings,
+				"tdeathPatientNumbers": tdeathPatientNumbers,
+				"tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+			};
+			if (currentNode[0].children != null){
+				currentNode[0].children.push(myJSONObject);
+				//console.log(currentNode[0].children);
+				//console.log('sibling children');
+				//source.children = source._children;
+				//source._children = null;
+			}
 
-            else{
-                currentNode[0].children = []
-                currentNode[0].children.push(myJSONObject);
-                //console.log(currentNode[0].children);
-                //console.log('first child');
-            }
+			else{
+				currentNode[0].children = []
+				currentNode[0].children.push(myJSONObject);
+				//console.log(currentNode[0].children);
+				//console.log('first child');
+			}
 
-            tree.links(currentNode).push(currentNode[currentNode.length - 1]);
+			tree.links(currentNode).push(currentNode[currentNode.length - 1]);
 
-            return(myJSONObject);
-        }
-        
-        function previousFilter(currNode){
-            //returns the graphs to a previous filtering step
-            //properties of the admiss,age, sex, mort, oasis, and tdeath in the treeData object seem to change after each filter step. Why?
-            console.log("returning to a previous filter")
-            console.log(currNode)
-            console.log("filter at Node: " + currNode.name + ', ' + currNode.id)
-            parent = currNode;
-            workingNode = currNode;
-            //var currentNode = tree.nodes(currNode)
-            
-            admissPatientNumbers = currNode.admissPatientNumbers
+			return(myJSONObject);
+		}
+		
+		function previousFilter(currNode){
+			//returns the graphs to a previous filtering step
+			//properties of the admiss,age, sex, mort, oasis, and tdeath in the treeData object seem to change after each filter step. Why?
+			console.log("returning to a previous filter")
+			console.log(currNode)
+			console.log("filter at Node: " + currNode.name + ', ' + currNode.id)
+			parent = currNode;
+			workingNode = currNode;
+			//var currentNode = tree.nodes(currNode)
+			
+			admissPatientNumbers = currNode.admissPatientNumbers
 			agePatientNumbers = currNode.agePatientNumbers
 			sexPatientNumbers = currNode.sexPatientNumbers
 			mortPatientNumbers = currNode.mortPatientNumbers
@@ -934,69 +989,69 @@
 			mortSelected = currNode.mortSelected
 			diagnosisSelected = currNode.diagnosisSelected
 			oasisSelected = currNode.oasisSelected
-            
+			
 			admissFilterStrings = currNode.admissFilterStrings
 			ageFilterStrings = currNode.ageFilterStrings
 			sexFilterStrings = currNode.sexFilterStrings
 			mortFilterStrings = currNode.mortFilterStrings
 			diagnosisFilterStrings = currNode.diagnosisFilterStrings
 			oasisFilterStrings = currNode.oasisFilterStrings
-            
-            updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
+			
+			updateTopChart(admissChart, admissDim, admissKeyFunction, admissOrderFunction, admissSelectedPatientNumbers, admissScales, admissSelected);
 			updateTopChart(ageChart, ageDim, ageKeyFunction, ageOrderFunction, ageSelectedPatientNumbers, ageScales, ageSelected);
 			updateTopChart(sexChart, sexDim, sexKeyFunction, sexOrderFunction, sexSelectedPatientNumbers, sexScales, sexSelected);
 			updateTopChart(mortChart, mortDim, mortKeyFunction, mortOrderFunction, mortSelectedPatientNumbers, mortScales, mortSelected);
-            updateDiagnosisList();
-            updateOasisChart();
+			updateDiagnosisList();
+			updateOasisChart();
 			updateTdeathChart();
-            
-            renderFlowChart(currNode);
-        }
-        
-        function chopDownTree(){
-            //just until I make a more elegant solution
-            console.log("clear the tree");
-            flowChart.selectAll('g.node').remove();
-            flowChart.selectAll('path.link').remove();
-            treeData = [
-                  {
-                        "name": patients.length, 
-                        "parent": "null", 
-                        "children": [],
-                        "admissPatientNumbers": admissPatientNumbers,
-                        "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
-                        "admissFilterStrings": admissFilterStrings,
-                        "admissSelected": admissSelected,
-                        "agePatientNumbers": agePatientNumbers,
-                        "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
-                        "ageSelected": ageSelected,
-                        "ageFilterStrings": ageFilterStrings,
-                        "sexPatientNumbers": sexPatientNumbers,
-                        "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
-                        "sexSelected": sexSelected,
-                        "sexFilterStrings": sexFilterStrings,
-                        "mortPatientNumbers": mortPatientNumbers,
-                        "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
-                        "mortSelected": mortSelected,
-                        "mortFilterStrings": mortFilterStrings,
-                        "oasisPatientNumbers": oasisPatientNumbers,
-                        "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
-                        "oasisSelected": oasisSelected,
-                        "oasisFilterStrings": oasisFilterStrings,
-                        "diagnosisSelected": diagnosisSelected,
-                        "diagnosisFilterStrings": diagnosisFilterStrings,
-                        "tdeathPatientNumbers": tdeathPatientNumbers,
-                        "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
-              }
-            ];
-            root = treeData[0];
-            root.x0 = 300;
-            root.y0 = 300;
-            parent = root;
-            workingNode = root;
-            renderFlowChart(root);
-        }
-        
+			
+			renderFlowChart(currNode);
+		}
+		
+		function chopDownTree(){
+			//just until I make a more elegant solution
+			console.log("clear the tree");
+			flowChart.selectAll('g.node').remove();
+			flowChart.selectAll('path.link').remove();
+			treeData = [
+				  {
+						"name": patients.length, 
+						"parent": "null", 
+						"children": [],
+						"admissPatientNumbers": admissPatientNumbers,
+						"admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+						"admissFilterStrings": admissFilterStrings,
+						"admissSelected": admissSelected,
+						"agePatientNumbers": agePatientNumbers,
+						"ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+						"ageSelected": ageSelected,
+						"ageFilterStrings": ageFilterStrings,
+						"sexPatientNumbers": sexPatientNumbers,
+						"sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+						"sexSelected": sexSelected,
+						"sexFilterStrings": sexFilterStrings,
+						"mortPatientNumbers": mortPatientNumbers,
+						"mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+						"mortSelected": mortSelected,
+						"mortFilterStrings": mortFilterStrings,
+						"oasisPatientNumbers": oasisPatientNumbers,
+						"oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+						"oasisSelected": oasisSelected,
+						"oasisFilterStrings": oasisFilterStrings,
+						"diagnosisSelected": diagnosisSelected,
+						"diagnosisFilterStrings": diagnosisFilterStrings,
+						"tdeathPatientNumbers": tdeathPatientNumbers,
+						"tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+			  }
+			];
+			root = treeData[0];
+			root.x0 = 300;
+			root.y0 = 300;
+			parent = root;
+			workingNode = root;
+			renderFlowChart(root);
+		}
+		
 
 		// UPDATE CHART FUNCTIONS
 		function updateTopChart(chart, dimension, keyFunction, orderFunction, selectedPatientNumbersDict, scalesDict, selectedDict) {
@@ -1072,17 +1127,17 @@
 
 		function updateFlowChart() {
 			var patientTotal = cohortPatientTotal(ageSelectedPatientNumbers);
-            var newParent;
-            var newNodeName;
-            if (searchFlag == 1){
-                searchFlag = 0;
-                return;
-            }
+			var newParent;
+			var newNodeName;
+			if (searchFlag == 1){
+				searchFlag = 0;
+				return;
+			}
 			newNodeName = patientTotal
-            newParent = createTreeNode(parent, newNodeName);
-            workingNode = newParent;
-            renderFlowChart(parent);
-            parent = newParent;
+			newParent = createTreeNode(parent, newNodeName);
+			workingNode = newParent;
+			renderFlowChart(parent);
+			parent = newParent;
 		}
 		
 		function updateOasisChart() {
@@ -1213,7 +1268,7 @@
 
 			updateOasisChart();
 			updateTdeathChart();
-            updateFlowChart();
+			updateFlowChart();
 
 			
 		}
@@ -1430,24 +1485,24 @@
 		}
 
 		function renderFlowChart(source) {
-            // Modified from http://www.d3noob.org/2014/01/tree-diagrams-in-d3js_11.html
-            // and http://codesanswer.com/question/84585-d3-js-how-to-dynamically-add-nodes-to-a-tree
+			// Modified from http://www.d3noob.org/2014/01/tree-diagrams-in-d3js_11.html
+			// and http://codesanswer.com/question/84585-d3-js-how-to-dynamically-add-nodes-to-a-tree
 			 // Compute the new tree layout.
-              var nodes = tree.nodes(root).reverse(),
-                  links = tree.links(nodes);
+			  var nodes = tree.nodes(root).reverse(),
+				  links = tree.links(nodes);
 
-              // Normalize for fixed-depth.
-              nodes.forEach(function(d) { d.y = d.depth * 180; });
+			  // Normalize for fixed-depth.
+			  nodes.forEach(function(d) { d.y = d.depth * 180; });
 
-              // Update the nodes…
-              var node = flowChart.selectAll("g.node")
-                  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+			  // Update the nodes…
+			  var node = flowChart.selectAll("g.node")
+				  .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
-              // Enter any new nodes at the parent's previous position.
-              var nodeEnter = node.enter().append("g")
-                  .attr("class", "node")
-                  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-                  /*.on("mouseenter", function(d,i) { 
+			  // Enter any new nodes at the parent's previous position.
+			  var nodeEnter = node.enter().append("g")
+				  .attr("class", "node")
+				  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+				  /*.on("mouseenter", function(d,i) { 
 						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
 						var g = d3.select(this); // The node
 						// The class is used to remove the additional text later
@@ -1456,84 +1511,84 @@
 							.attr('x', 20)
 							.attr('y', 10)
 							.text(function(d) {return d.name});						
-				    })
+					})
 					.on("mouseleave", function(d,i) {
 						// Remove the info text on mouse out.
 						d3.select(this).select('text.info').remove();
 						
 					})*/
-                    .on("click", function(d,i){
-                        var currNode = d;
-                        console.log(currNode)
-                        previousFilter(currNode)
-                    })
-                    .call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", zoomed));;
-                    
-                    var sizeScale = d3.scale.linear()
+					.on("click", function(d,i){
+						var currNode = d;
+						console.log(currNode)
+						previousFilter(currNode)
+					})
+					.call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", zoomed));;
+					
+					var sizeScale = d3.scale.linear()
 					.range([1,1800])
 					.domain([0, patients.length]);
 
-              nodeEnter.append("circle")
-                  .attr("r", 1e-6)
-                  .style('fill', function(d){
-                            if (d.id == workingNode.id){
-                                return 'orange'; }});
+			  nodeEnter.append("circle")
+				  .attr("r", 1e-6)
+				  .style('fill', function(d){
+							if (d.id == workingNode.id){
+								return 'orange'; }});
 
-              nodeEnter.append("text")
-                  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
-                  .attr("dy", ".35em")
-                  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "middle"; })
-                  .attr("baseline-shift", "-2em")
-                  .text(function(d) { return d.name; })
-                  .style("fill-opacity", 1e-6);
+			  nodeEnter.append("text")
+				  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+				  .attr("dy", ".35em")
+				  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "middle"; })
+				  .attr("baseline-shift", "-2em")
+				  .text(function(d) { return d.name; })
+				  .style("fill-opacity", 1e-6);
 
-              // Transition nodes to their new position.
-              var nodeUpdate = node.transition()
-                  .duration(duration)
-                  .attr("transform", function(d) { 
-                      return "translate(" + d.y + "," + d.x + ")"; });
-            
+			  // Transition nodes to their new position.
+			  var nodeUpdate = node.transition()
+				  .duration(duration)
+				  .attr("transform", function(d) { 
+					  return "translate(" + d.y + "," + d.x + ")"; });
+			
 
-              nodeUpdate.select("circle")
-                    .attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
-                    .style('fill', function(d){
-                            if (d.id == workingNode.id){
-                                return 'orange';
-                            }
-              })
-                  //.style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+			  nodeUpdate.select("circle")
+					.attr("r", function(d) { return Math.sqrt(sizeScale(Number(d.name)) / Math.PI) })
+					.style('fill', function(d){
+							if (d.id == workingNode.id){
+								return 'orange';
+							}
+			  })
+				  //.style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
-              nodeUpdate.select("text")
-                  .style("fill-opacity", 1);
+			  nodeUpdate.select("text")
+				  .style("fill-opacity", 1);
 
-              // Update the links…
-              var link = flowChart.selectAll("path.link")
-                  .data(links, function(d) { return d.target.id; });
+			  // Update the links…
+			  var link = flowChart.selectAll("path.link")
+				  .data(links, function(d) { return d.target.id; });
 
-              // Enter any new links at the parent's previous position.
-              link.enter().insert("path", "g")
-                  .attr("class", "link")
-                  .attr("d", function(d) {
-                    var o = {x: source.x0, y: source.y0};
-                    return diagonal({source: o, target: o});
-                  });
+			  // Enter any new links at the parent's previous position.
+			  link.enter().insert("path", "g")
+				  .attr("class", "link")
+				  .attr("d", function(d) {
+					var o = {x: source.x0, y: source.y0};
+					return diagonal({source: o, target: o});
+				  });
 
-              // Transition links to their new position.
-              link.transition()
-                  .duration(duration)
-                  .attr("d", diagonal);
+			  // Transition links to their new position.
+			  link.transition()
+				  .duration(duration)
+				  .attr("d", diagonal);
 
-              // Stash the old positions for transition.
-              nodes.forEach(function(d) {
-                d.x0 = d.x;
-                d.y0 = d.y;
-              });
-        }
-        
-        function zoomed()
-        {
-        	flowChart.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        }
+			  // Stash the old positions for transition.
+			  nodes.forEach(function(d) {
+				d.x0 = d.x;
+				d.y0 = d.y;
+			  });
+		}
+		
+		function zoomed()
+		{
+			flowChart.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		}
 
 
 		function renderOasisChart() {
@@ -1784,6 +1839,11 @@
 
 				d.cumpercentage = (100*d.cumsum/patients.length)
 			});
+
+			cutDataset = [];
+			dataset.forEach(function(d,i) {
+				if (d.xvalue <= 365) { cutDataset.push(d); }
+			});
 			
 			// Now repeat for selected patients
 			var selectedPatients = tdeathDim.top(Infinity);
@@ -1795,7 +1855,7 @@
 			
 			selectedDataset
 				.sort(function(a,b) { return d3.ascending(a.key, b.key); });
-			
+
 			if (selectedDataset[selectedDataset.length-1].key === "null") { selectedDataset = selectedDataset.slice(0,selectedDataset.length-1); }
 
 			selectedDataset.forEach(function(d, i) {
@@ -1816,6 +1876,11 @@
 				else {d.cumsum = selectedDataset[i-1].cumsum + d.yvalue; }
 
 				d.cumpercentage = (100*d.cumsum/selectedPatients.length);
+			});
+
+			cutSelectedDataset = [];
+			selectedDataset.forEach(function(d,i) {
+				if (d.xvalue <= 365) { cutSelectedDataset.push(d); }
 			});
 
 			// Define the chart
@@ -1843,7 +1908,7 @@
 			// x Domain is the ordinal d.key
 			tdeathScales.xScale = d3.scale.linear()
 				.range([0,bottomChartInnerWidth])
-                .domain([0,365]);
+				.domain([0,365]);
 				//.domain([0,d3.max(dataset, function(d) { return d.xvalue; })]);
 
 			// y Domain is the d.value
@@ -1853,7 +1918,7 @@
 			
 			// Plot the background circles
 			backgroundDataPointGroup.selectAll("circle")
-				.data(dataset)
+				.data(cutDataset)
 				.enter()
 				.append("circle")
 				.attr("r", 2)
@@ -1862,7 +1927,7 @@
 			
 			// Plot the foreground circles
 			foregroundDataPointGroup.selectAll("circle")
-				.data(selectedDataset)
+				.data(cutSelectedDataset)
 				.enter()
 				.append("circle")
 				.attr("r", 2)
@@ -1885,12 +1950,12 @@
 		// BUTTONS
 
 		function searchButton() {
-            searchFlag = 1;
+			searchFlag = 1;
 			updateData();
 		}
 
 		function resetButton() {
-            console.log("reset0")
+			console.log("reset0")
 			admissPatientNumbers = {};
 			agePatientNumbers = {};
 			sexPatientNumbers = {};
@@ -1930,10 +1995,10 @@
 			diagnosisDim.filterAll();
 			oasisDim.filterAll();
 			tdeathDim.filterAll();
-            
+			
 			updateData();
-            console.log("reset")
-            chopDownTree(); // The tree doesn't want to fall down either...
+			console.log("reset")
+			chopDownTree(); // The tree doesn't want to fall down either...
 		}
 
 		// RENDER
@@ -1948,7 +2013,7 @@
 
 			renderOasisChart();
 			renderTdeathChart();
-            renderFlowChart(root);
+			renderFlowChart(root);
 		}
 
 		function renderLabels () {
@@ -2040,58 +2105,84 @@
 			diagnosisDim = cf.dimension(function (d) { return JSON.stringify({d1:d.d1, d2:d.d2, d3:d.d3}); });
 			oasisDim = cf.dimension(function (d) { return d.OASIS; });
 			tdeathDim = cf.dimension(function (d) { return d.Tdeath });
-            treeData = [
-                  {
-                    "name": patients.length, 
-                    "parent": "null", 
-                    "children": [],
-                    "admissPatientNumbers": admissPatientNumbers,
-                    "admissSelectedPatientNumbers": admissSelectedPatientNumbers,
-                    "admissFilterStrings": admissFilterStrings,
-                    "admissSelected": admissSelected,
-                    "agePatientNumbers": agePatientNumbers,
-                    "ageSelectedPatientNumbers": ageSelectedPatientNumbers,
-                    "ageSelected": ageSelected,
-                    "ageFilterStrings": ageFilterStrings,
-                    "sexPatientNumbers": sexPatientNumbers,
-                    "sexSelectedPatientNumbers": sexSelectedPatientNumbers,
-                    "sexSelected": sexSelected,
-                    "sexFilterStrings": sexFilterStrings,
-                    "mortPatientNumbers": mortPatientNumbers,
-                    "mortSelectedPatientNumbers": mortSelectedPatientNumbers,
-                    "mortSelected": mortSelected,
-                    "mortFilterStrings": mortFilterStrings,
-                    "oasisPatientNumbers": oasisPatientNumbers,
-                    "oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
-                    "oasisSelected": oasisSelected,
-                    "oasisFilterStrings": oasisFilterStrings,
-                    "diagnosisSelected": diagnosisSelected,
-                    "diagnosisFilterStrings": diagnosisFilterStrings,
-                    "tdeathPatientNumbers": tdeathPatientNumbers,
-                    "tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
-                  }
-            ];
-            root = treeData[0];
-            // should be root.x0 = height of flowchart/2 but using main
-            root.x0 = 300;
-            root.y0 = 300;
+			treeData = [
+				  {
+					"name": patients.length, 
+					"parent": "null", 
+					"children": [],
+					"admissPatientNumbers": admissPatientNumbers,
+					"admissSelectedPatientNumbers": admissSelectedPatientNumbers,
+					"admissFilterStrings": admissFilterStrings,
+					"admissSelected": admissSelected,
+					"agePatientNumbers": agePatientNumbers,
+					"ageSelectedPatientNumbers": ageSelectedPatientNumbers,
+					"ageSelected": ageSelected,
+					"ageFilterStrings": ageFilterStrings,
+					"sexPatientNumbers": sexPatientNumbers,
+					"sexSelectedPatientNumbers": sexSelectedPatientNumbers,
+					"sexSelected": sexSelected,
+					"sexFilterStrings": sexFilterStrings,
+					"mortPatientNumbers": mortPatientNumbers,
+					"mortSelectedPatientNumbers": mortSelectedPatientNumbers,
+					"mortSelected": mortSelected,
+					"mortFilterStrings": mortFilterStrings,
+					"oasisPatientNumbers": oasisPatientNumbers,
+					"oasisSelectedPatientNumbers": oasisSelectedPatientNumbers,
+					"oasisSelected": oasisSelected,
+					"oasisFilterStrings": oasisFilterStrings,
+					"diagnosisSelected": diagnosisSelected,
+					"diagnosisFilterStrings": diagnosisFilterStrings,
+					"tdeathPatientNumbers": tdeathPatientNumbers,
+					"tdeathSelectedPatientNumbers": tdeathSelectedPatientNumbers
+				  }
+			];
+			root = treeData[0];
+			// should be root.x0 = height of flowchart/2 but using main
+			root.x0 = 300;
+			root.y0 = 300;
 			parent = root;
-            workingNode = root;
+			workingNode = root;
 	
+		}
+
+		function hideLoading() {
+			d3.select("#loading").style({
+				visibility: "hidden"
+			});
+		}
+
+		function showError() {
+			d3.select("#error").style({
+				visibility: "visible"
+			});
 		}
 
 		// READ IN EXTERNAL FILES
 		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/icd9_3.json", function(error, data) {
-			icd9 = data;
-		});
+			if (error === null) {
+				icd9 = data;
 
-		d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_4.json", function(error, data) {
-			patients = data;
+				d3.json("https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMIC_InfoVis_4.json", function(error, data) {
+					if (error === null) {
+						patients = data;
 
-			init();
+						init();
 
-			render();
-			renderLabels();
+						render();
+						renderLabels();
+
+						hideLoading();
+					}
+					else {
+						hideLoading();
+						showError();
+					}
+				});
+			}
+			else {
+				hideLoading();
+				showError();
+			}
 		});
 	</script>
 </html>

@@ -92,7 +92,7 @@
 			}
 			.mainchart {
 				width: 912px;
-				height: 220px;
+				height: 193px;
 			}
 			.bottomchart {
 				width: 453px;
@@ -116,8 +116,7 @@
 			}
 
 			#scrolldiv {
-				//height: 374px;
-                height: 374px;
+                		height: 374px;
 				width: 100%;
 				overflow-x:none;
 				overflow-y:scroll;
@@ -315,6 +314,9 @@
 				</div>
 			</div>
 			<div class="chartarea">
+				<div class="chart-title"> 
+					<strong>Flow Chart</strong>
+				</div>
 				<svg class="mainchart" id="flowchart">
 				</svg>
 			</div>
@@ -1445,7 +1447,7 @@
               var nodeEnter = node.enter().append("g")
                   .attr("class", "node")
                   .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-                  .on("mouseenter", function(d,i) { 
+                  /*.on("mouseenter", function(d,i) { 
 						//work around mouseenter and mouseleave until I can get  the tooltip to function properly. Also it displays the name of the node want to change to either the total patients or a filter name of some kind
 						var g = d3.select(this); // The node
 						// The class is used to remove the additional text later
@@ -1459,11 +1461,13 @@
 						// Remove the info text on mouse out.
 						d3.select(this).select('text.info').remove();
 						
-					})
+					})*/
                     .on("click", function(d,i){
                         var currNode = d;
                         console.log(currNode)
-                        previousFilter(currNode);
+                        previousFilter(currNode)
+                    .call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", zoomed))
+                    .call(drag);
                 });
                   
               var sizeScale = d3.scale.linear()
@@ -1524,6 +1528,11 @@
                 d.x0 = d.x;
                 d.y0 = d.y;
               });
+        }
+        
+        function zoomed()
+        {
+        	flowChart.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         }
 
 

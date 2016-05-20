@@ -1524,10 +1524,19 @@
 					})*/
 					.on("click", function(d,i){
 						var currNode = d;
-						console.log(currNode)
-						previousFilter(currNode)
+						if(d.children){
+                        				d._children = d.children;
+                        				d.children = null;
+                        			}
+                        			else{
+                        				d.children = d._children;
+                        				d._children = null;
+                				 }
+                				renderFlowChart(d);
+						console.log(currNode);
+						previousFilter(currNode);
 					})
-					.call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", zoomed));;
+					.call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", zoomed));
 					
 					var sizeScale = d3.scale.linear()
 					.range([1,1800])
@@ -1569,6 +1578,10 @@
 			  // Update the links…
 			  var link = flowChart.selectAll("path.link")
 				  .data(links, function(d) { return d.target.id; });
+				  
+			   //collapse links and nodes
+              		   link.exit().remove();
+              		   node.exit().remove();
 
 			  // Enter any new links at the parent's previous position.
 			  link.enter().insert("path", "g")

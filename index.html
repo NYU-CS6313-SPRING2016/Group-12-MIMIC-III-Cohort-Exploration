@@ -1245,11 +1245,16 @@
 				d.cumpercentage = (100*d.cumsum/selectedPatients.length);
 			});
 
+			cutSelectedDataset = [];
+			selectedDataset.forEach(function(d,i) {
+				if (d.xvalue <= 365) { cutSelectedDataset.push(d); }
+			});
+
 			tdeathChart.select("g.fg").selectAll("circle")
 				.remove();
 
 			tdeathChart.select("g.fg").selectAll("circle")
-				.data(selectedDataset)
+				.data(cutSelectedDataset)
 				.enter()
 				.append("circle")
 				.attr("r", 2)

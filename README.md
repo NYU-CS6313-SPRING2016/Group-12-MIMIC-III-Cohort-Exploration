@@ -8,7 +8,7 @@
 
 Main development branch is gh-pages https://github.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/tree/gh-pages
 
-Screenshot of the tool: https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/blob/master/MIMICIII_InfoViz.tiff
+Screenshot of the tool: https://raw.githubusercontent.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/master/MIMICIII_InfoViz.jpg
 
 Live demo at http://nyu-cs6313-spring2016.github.io/Group-12-MIMIC-III-Cohort-Exploration/
 

@@ -4,7 +4,7 @@
 
 ## Medical cohort exploration group project for the Information Visualization Spring '16 class at NYU
 
-# Project Description: An interactive visualization tool for high-level exploration of critical care cohorts using the MIMIC-III database.
+## Project Description: An interactive visualization tool for high-level exploration of critical care cohorts using the MIMIC-III database.
 
 Main development branch is gh-pages https://github.com/NYU-CS6313-SPRING2016/Group-12-MIMIC-III-Cohort-Exploration/tree/gh-pages
 
